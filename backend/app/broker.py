@@ -7,6 +7,10 @@ def on_connect(client, userdata, flags, reason_code, properties):
     # reconnect then subscriptions will be renewed.
     client.subscribe("$SYS/#")
 
+# TODO env vars
+def setup_connection(host: str = "mqtt-broker", port: int = 1883, keepalive: int = 60):
+    mqttc.connect(host, port, keepalive)
+    mqttc.loop_start()
+
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqttc.on_connect = on_connect
-mqttc.connect("mqtt-broker", 1883, 60)

@@ -1,5 +1,26 @@
-CREATE TABLE modules (module_id tinyint, position bit, model bit)
--- position and model are not defined yet, but should be in the future
+CREATE TABLE modules (
+    -- position and model are not defined yet, but should be in the future
+    module_id SERIAL PRIMARY KEY,
+    position int,
+    model varchar
+);
 
-CREATE TABLE sensors (sensor_id tinyint, sensor_type varchar, sensor_unit varchar )
-CREATE TABLE records (module_ID tinyint, record_time datetime, record_value float(24), sensor_id)
+INSERT INTO modules (position, model) VALUES (1, 'UNKNOWN_MODEL');
+
+CREATE TABLE sensors (
+    sensor_id SERIAL PRIMARY KEY,
+    sensor_type varchar,
+    sensor_unit varchar
+);
+
+INSERT INTO sensors (sensor_type, sensor_unit) VALUES ('UNKNOWN_SENSOR', 'UNKNOWN_MODEL');
+
+CREATE TABLE records (
+    module_id int NOT NULL,
+    record_time timestamp,
+    record_value float,
+    sensor_id int NOT NULL,
+
+    CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id),
+    CONSTRAINT fk_sensor FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id)
+);
