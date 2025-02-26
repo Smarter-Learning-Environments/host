@@ -10,10 +10,12 @@ INSERT INTO modules (position, model) VALUES (1, 'UNKNOWN_MODEL');
 CREATE TABLE sensors (
     sensor_id SERIAL PRIMARY KEY,
     sensor_type varchar,
-    sensor_unit varchar
+    sensor_unit varchar,
+    module_id int,
+    foreign key (module_id) references modules(module_id)
 );
 
-INSERT INTO sensors (sensor_type, sensor_unit) VALUES ('UNKNOWN_SENSOR', 'UNKNOWN_MODEL');
+INSERT INTO sensors (sensor_type, sensor_unit, module_id) VALUES ('UNKNOWN_SENSOR', 'UNKNOWN_MODEL', 1);
 
 CREATE TABLE records (
     module_id int NOT NULL,
