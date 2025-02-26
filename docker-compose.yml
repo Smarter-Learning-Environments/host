@@ -38,6 +38,7 @@ services:
       DB_HOST: postgres
       DB_USER: user
       DB_PASS: password
+      DB_NAME: mydb
     # DEV - MOUNT HOT VOLUME
     volumes:
       - ./backend/app:/backend/app

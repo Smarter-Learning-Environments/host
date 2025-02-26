@@ -1,4 +1,12 @@
+import os
 from enum import StrEnum
+
+class ENV_VARS(StrEnum):
+    MQTT_BROKER_HOST = os.getenv('MQTT_BROKER_HOST', 'mqtt-broker')
+    DB_HOST = os.getenv('DB_HOST', 'postgres')
+    DB_USER = os.getenv('DB_USER', 'user')
+    DB_PASS = os.getenv('DB_PASS', 'password')
+    DB_NAME = os.getenv('DB_NAME', 'mydb')
 
 class Factors(StrEnum):
     TEMPERATURE = "temp"

@@ -1,3 +1,4 @@
+from . import utils as Utils
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 
@@ -7,8 +8,7 @@ def on_connect(client, userdata, flags, reason_code, properties):
     # reconnect then subscriptions will be renewed.
     client.subscribe("$SYS/#")
 
-# TODO env vars
-def setup_connection(host: str = "mqtt-broker", port: int = 1883, keepalive: int = 60):
+def setup_connection(host: str = Utils.ENV_VARS.MQTT_BROKER_HOST, port: int = 1883, keepalive: int = 60):
     mqttc.connect(host, port, keepalive)
     mqttc.loop_start()
 
