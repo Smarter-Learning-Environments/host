@@ -1,9 +1,8 @@
 from fastapi import FastAPI
-from . import broker as Broker
-from . import db
+from . import broker, db
 
 def startServer() -> FastAPI:
-    Broker.setup_connection()
+    broker.setup_connection()
     return FastAPI()
 
 app = startServer()
@@ -14,7 +13,7 @@ def read_root():
 
 @app.post("/test_post")
 def test_post():
-    Broker.publish.single("paho/test/topic", "payload", hostname="mqtt-broker")
+    broker.publish.single("paho/test/topic", "message", hostname="mqtt-broker")
     return {"message": "Hello, World!"}
 
 @app.get("/test_db")
