@@ -39,6 +39,7 @@ services:
       DB_USER: user
       DB_PASS: password
       DB_NAME: mydb
+      PYTHONUNBUFFERED: 1
     # DEV - MOUNT HOT VOLUME
     volumes:
       - ./backend/app:/backend/app
