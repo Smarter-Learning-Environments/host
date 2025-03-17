@@ -1,8 +1,20 @@
+CREATE TABLE room (
+    room_id SERIAL PRIMARY KEY,
+    room_name varchar,
+    x_max int,
+    y_max int,
+    z_max int
+)
+
 CREATE TABLE modules (
     -- position and model are not defined yet, but should be in the future
     module_id SERIAL PRIMARY KEY,
-    position int,
-    model varchar
+    room_id int,
+    position_x int,
+    position_y int,
+    position_z int,
+    model varchar,
+    FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
 INSERT INTO modules (position, model) VALUES (1, 'UNKNOWN_MODEL');
@@ -19,7 +31,8 @@ INSERT INTO sensors (sensor_type, sensor_unit, module_id) VALUES ('UNKNOWN_SENSO
 
 CREATE TABLE records (
     module_id int NOT NULL,
-    record_time timestamp,
+    -- record_time : unix time
+    record_time int,
     record_value float,
     sensor_id int NOT NULL,
 
