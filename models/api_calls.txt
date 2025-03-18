@@ -1,5 +1,4 @@
 /get-latest-reading/{room_id}
-
     GET
 
     Asks for latest reading of a certain room
@@ -32,7 +31,6 @@
 }
 
 /place-module
-
 When the admin of a classroom clicks a location on the map, they an input a module with different sensor types. The module and corresponding sensors are then added to the database
 
 POST:
@@ -56,6 +54,43 @@ POST:
 {"error" : "invalid location"}
 
 /login-administrator
+Takes admin password and logs them in
+
+POST:
+{
+    "room_id" : "1",
+    "password" : "admin123"
+}
+
+200:
+{
+    "success" : "true"
+}
+
+400:
+{
+    "error" : "incorrect password"
+}
+
 /set-administrator
+sets admin password the first time admin is clicked
+
+POST:
+{
+    "room_id" : "1",
+    "password" : "admin123"
+
+}
+
+200:
+{
+    "success" : "true"
+}
+
+400:
+{
+    "error" : "admin password already set"
+}
+
 /get-data-timerange/{time_start}/{time_end?}
 /get-lastn-datapoints/{n}
