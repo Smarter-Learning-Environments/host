@@ -1,15 +1,16 @@
-/get-latest-reading/{room_id}
+## /get-latest-reading/{room_id}
 Asks for latest reading of a certain room    
 
 GET
 
+```json
 200:
 {
     "modules" : 
         [
             {
                 "module_id" : "0",
-                "module_xyz" : "100, 50, 0",
+                "module_xyz" : ["100", "50", "0"],
                 "readings" : 
                     [
                         {
@@ -18,10 +19,10 @@ GET
                             "sensor_units" : "ppm",
                             "value" : "600"
                         },
-                        ...
+                        //...
                     ]
             },
-            ...
+            //...
         ]
 }
 
@@ -34,33 +35,44 @@ GET
 {
     "error" : "invalid room number"
 }
+```
 
-/place-module
+## /place-module
 When the admin of a classroom clicks a location on the map, they an input a module with different sensor types. The module and corresponding sensors are then added to the database
 
+```json
 POST:
 {
     "room_id" : "1",
     "x" : "50",
     "y" : "100",
     "z" : "0",
-    "sensors" : [
-        {"sensor_type" : "CO2",
-        "sensor_unit" : "ppm"},
-        {"sensor_type: "temp",
-        "sensor_unit: "celsius"}
-    ]
+    "sensors" : 
+        [
+            {
+                "sensor_type" : "CO2",
+                "sensor_unit" : "ppm"
+            },
+            {
+                "sensor_type" : "temp",
+                "sensor_unit" : "celsius"
+            }
+        ]
 }
 
 200:
+
 {"success" : "true"}
 
 400:
+
 {"error" : "invalid location"}
+```
 
 /login-administrator
 Takes admin password and logs them in
 
+```json
 POST:
 {
     "room_id" : "1",
@@ -76,10 +88,12 @@ POST:
 {
     "error" : "incorrect password"
 }
+```
 
-/set-administrator
+## /set-administrator
 sets admin password the first time admin is clicked
 
+```json
 POST:
 {
     "room_id" : "1",
@@ -95,10 +109,12 @@ POST:
 {
     "error" : "admin password already set"
 }
+```
 
-/get-data-timerange/{time_start}/{time_end?}
+## /get-data-timerange/{time_start}/{time_end?}
 gets all data points from start time to current, or specified end time
 
+```json
 GET
 
 200:
@@ -111,7 +127,7 @@ GET
                     [
                         {
                             "module_id" : "0",
-                            "module_xyz" : "100, 50, 0",
+                            "module_xyz" : ["100", "50", "0"],
                             "readings" : 
                                 [
                                     {
@@ -120,13 +136,12 @@ GET
                                         "sensor_units" : "ppm",
                                         "value" : "600"
                                     },
-                                    ...
+                                    //...
                                 ]
                         },
-                        ...
                     ]
             },
-            ...
+            //...
         ]
 }
 
@@ -134,11 +149,13 @@ GET
 {
     "error" : "invalid start time"
 }
+```
 
 
-/get-lastn-datapoints/{n}
+## /get-lastn-datapoints/{n}
 gets most recent n datapoints from each sensor
 
+```json
 GET
 
 {
@@ -150,7 +167,7 @@ GET
                     [
                         {
                             "module_id" : "0",
-                            "module_xyz" : "100, 50, 0",
+                            "module_xyz" : ["100", "50", "0"],
                             "readings" : 
                                 [
                                     {
@@ -159,13 +176,13 @@ GET
                                         "sensor_units" : "ppm",
                                         "value" : "600"
                                     },
-                                    ...
+                                    //...
                                 ]
                         },
-                        ...
+                        //...
                     ]
             },
-            ...
+            //...
         ]
 }
 
@@ -173,3 +190,4 @@ GET
 {
     "error" : "10 data points do not exist"
 }
+```
