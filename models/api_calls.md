@@ -9,15 +9,15 @@ GET
     "modules" : 
         [
             {
-                "module_id" : "0",
-                "module_xyz" : ["100", "50", "0"],
+                "module_id" : 0,
+                "module_xyz" : [100, 50, 0],
                 "readings" : 
                     [
                         {
                             "sensor_id" : "2381",
                             "sensor_type" : "CO2",
                             "sensor_units" : "ppm",
-                            "value" : "600"
+                            "value" : 600
                         },
                         //...
                     ]
@@ -43,10 +43,10 @@ When the admin of a classroom clicks a location on the map, they an input a modu
 ```json
 POST:
 {
-    "room_id" : "1",
-    "x" : "50",
-    "y" : "100",
-    "z" : "0",
+    "room_id" : 1,
+    "x" : 50,
+    "y" : 100,
+    "z" : 0,
     "sensors" : 
         [
             {

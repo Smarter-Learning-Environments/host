@@ -4,7 +4,9 @@ CREATE TABLE room (
     x_max int,
     y_max int,
     z_max int
-)
+);
+
+INSERT INTO room (room_name) VALUES ('Test room');
 
 CREATE TABLE modules (
     -- position and model are not defined yet, but should be in the future
@@ -17,7 +19,7 @@ CREATE TABLE modules (
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
-INSERT INTO modules (position, model) VALUES (1, 'UNKNOWN_MODEL');
+INSERT INTO modules (room_id, model) VALUES (1, 'UNKNOWN_MODEL');
 
 CREATE TABLE sensors (
     sensor_id SERIAL PRIMARY KEY,
