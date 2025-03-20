@@ -30,6 +30,7 @@ CREATE TABLE sensors (
 );
 
 INSERT INTO sensors (sensor_type, sensor_unit, module_id) VALUES ('UNKNOWN_SENSOR', 'UNKNOWN_MODEL', 1);
+INSERT INTO sensors (sensor_type, sensor_unit, module_id) VALUES ('UNKNOWN_SENSOR_2', 'UNKNOWN_MODEL', 1);
 
 CREATE TABLE records (
     module_id int NOT NULL,
@@ -41,3 +42,5 @@ CREATE TABLE records (
     CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id),
     CONSTRAINT fk_sensor FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id)
 );
+
+INSERT INTO records (module_id, record_time, record_value, sensor_id) VALUES (1, 1300, 18, 1);

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import pandas as pd
+from fastapi import FastAPI, Response, status
 from . import broker, db
 
 def startServer() -> FastAPI:
@@ -15,14 +16,24 @@ def read_root():
 def test_post():
     broker.publish.single("paho/test/topic", "message", hostname="mqtt-broker")
     return {"message": "Hello, World!"}
-
-@app.get("/test-db")
-def test_db():
-    db.deposit_sensor_reading(1, 1, 1, 1.1)
-    return {"test_result", db.test_sensor_reading()[0]}
-
+ 
 @app.get("/get-latest-reading/{room_id}")
-def get_latest_reading(room_id: int):
-    res = {"modules", []}
-    res['modules'].append
-    return {"test_endpoint", "gwagwa"}
+def get_latest_reading(room_id: int, response: Response):
+    code, query =  db.get_latest_reading(room_id=room_id)
+    response.status_code = code
+    df = pd.DataFrame(query[1], columns=query[0])
+    res = []
+    for module_id, module_df in df.groupby('module_id'):
+        print(module_df)
+        res.append({
+            "module_id": module_id,
+            "module_xyz": [
+                module_df.iloc[0]['position_x'],
+                module_df.iloc[0]['position_y'],
+                module_df.iloc[0]['position_z']
+            ],
+            "readings": [
+                # TODO
+            ]
+        })
+    return res

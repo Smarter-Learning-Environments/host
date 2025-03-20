@@ -1,3 +1,4 @@
 fastapi[standard]
 paho-mqtt
 psycopg2-binary
+pandas
