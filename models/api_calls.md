@@ -43,10 +43,8 @@ When the admin of a classroom clicks a location on the map, they an input a modu
 ```json
 POST:
 {
-    "room_id" : "1",
     "x" : "50",
     "y" : "100",
-    "z" : "0",
     "sensors" : 
         [
             {
@@ -69,7 +67,7 @@ POST:
 {"error" : "invalid location"}
 ```
 
-/login-administrator
+## /login-administrator
 Takes admin password and logs them in
 
 ```json
