@@ -1,6 +1,7 @@
+import psycopg2
 import pandas as pd
+from . import broker, db, sql
 from fastapi import FastAPI, Response, status
-from . import broker, db
 
 def startServer() -> FastAPI:
     broker.setup_connection()
@@ -19,10 +20,15 @@ def test_post():
  
 @app.get("/get-latest-reading/{room_id}")
 def get_latest_reading(room_id: int, response: Response):
-    code, query =  db.get_latest_reading(room_id=room_id)
-    response.status_code = code
-    df = pd.DataFrame(query[1], columns=query[0])
-    
+    df = None
+
+    try:
+        columns, results = db.execute_sql(sql.LATEST_READINGS_QUERY, args=(room_id,), column_names=True)
+        df = pd.DataFrame(results, columns=columns)
+    except psycopg2.Error as e:
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+
     res = []
     for module_id, module_df in df.groupby('module_id'):
         print(module_df)
