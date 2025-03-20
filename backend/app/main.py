@@ -22,6 +22,7 @@ def get_latest_reading(room_id: int, response: Response):
     code, query =  db.get_latest_reading(room_id=room_id)
     response.status_code = code
     df = pd.DataFrame(query[1], columns=query[0])
+    
     res = []
     for module_id, module_df in df.groupby('module_id'):
         print(module_df)

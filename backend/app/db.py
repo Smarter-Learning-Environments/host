@@ -41,19 +41,21 @@ def deposit_sensor_reading(module_id: int, sensor_id: int, record_time: int, rec
 
         # TODO move error handling and error codes to calling function
 
-def with_cursor(conn, func, column_names=False):
+def execute_sql(conn, sql: str, args: tuple = None, column_names: bool = False):
+    """
+    Use an existing connection to open a cursor and execute the given SQL.
+    
+    :param conn: Open postgres connection
+    :param sql: SQL to run. Use %s to denote an argument
+    :param args: Arguments to fill inside the SQL string
+    :param column_names: Return query results and column names extracted from cursor information. 
+    """
     with conn:
         with conn.cursor() as curs:
-            res = func(curs)
-            return res if not column_names else ([desc[0] for desc in curs.description], res)
-
-def execute_sql(conn, sql: str, args: tuple = None, column_names=False):
-    return with_cursor(conn, lambda curs: curs_execute(curs, sql, args) or not column_names or curs.fetchall(), column_names)
-
-# TODO redundnat to split this into two funcs...
-    
-def curs_execute(curs, sql, args = None):
-    if args:
-        return curs.execute(sql, args)
-    else:
-        return curs.exevute(sql)
+            if args:
+                curs.execute(sql, args)
+            else:
+                curs.execute(sql)
+            
+            if(column_names):
+                return([desc[0] for desc in curs.description], curs.fetchall())
