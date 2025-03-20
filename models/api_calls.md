@@ -69,7 +69,7 @@ POST:
 {"error" : "invalid location"}
 ```
 
-/login-administrator
+## /login-administrator
 Takes admin password and logs them in
 
 ```json
