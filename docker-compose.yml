@@ -45,5 +45,14 @@ services:
       - ./backend/app:/backend/app
     restart: unless-stopped
 
+  frontend:
+    build: ./frontend
+    container_name: frontend_service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:
