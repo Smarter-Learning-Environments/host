@@ -11,13 +11,19 @@ GET
             {
                 "module_id" : 0,
                 "module_xyz" : [100, 50, 0],
-                "readings" : 
+                "sensors" : 
                     [
                         {
                             "sensor_id" : "2381",
                             "sensor_type" : "CO2",
                             "sensor_units" : "ppm",
-                            "value" : 600
+                            "readings": [
+                                {
+                                    "value" : 600,
+                                    "time": 1
+                                },
+                            //...
+                            ]
                         },
                         //...
                     ]
