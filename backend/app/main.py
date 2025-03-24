@@ -28,6 +28,7 @@ def get_latest_reading(room_id: int, response: Response):
         df = pd.DataFrame(results, columns=columns)
     except psycopg2.Error as e:
         # TODO more granular error codes
+        # TODO 404 room id not found
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
 
@@ -66,10 +67,10 @@ def get_data_timerange(time_start: int, time_end: int, response: Response):
     try:
         columns, results = db.execute_sql(sql.READINGS_TIMERANGE_QUERY, args=(time_start, time_end), column_names=True)
         df = pd.DataFrame(results, columns=columns)
-        print(columns)
-        print(results)
     except psycopg2.Error as e:
         # TODO more granular error codes
+        # TODO 404 Time range returns no result
+        # TODO Query params to filter by module? Room? Sensor 
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
     
@@ -94,8 +95,6 @@ def get_data_timerange(time_start: int, time_end: int, response: Response):
                 'readings': []
             })
             for row in sensor_df[['record_value', 'record_time']].itertuples():
-                print(row)
-
                 res[module_idx]["sensors"][sensor_idx]["readings"].append({"value": row[1], "time": int(row[2])})
             sensor_idx += 1
         module_idx += 1
