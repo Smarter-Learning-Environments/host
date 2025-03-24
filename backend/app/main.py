@@ -30,6 +30,7 @@ def get_latest_reading(room_id: int, response: Response):
         return {"error": type(e), "msg": e.pgerror}
 
     res = []
+    idx = 0
     for module_id, module_df in df.groupby('module_id'):
         print(module_df)
         res.append({
@@ -39,8 +40,22 @@ def get_latest_reading(room_id: int, response: Response):
                 module_df.iloc[0]['position_y'],
                 module_df.iloc[0]['position_z']
             ],
-            "readings": [
-                # TODO
-            ]
+            "readings": []
         })
+        for sensor_id, sensor_type, sensor_units, value, time in zip(
+                module_df['sensor_id'],
+                module_df['sensor_type'],
+                module_df['sensor_unit'],
+                module_df['record_value'],
+                module_df['record_time'],
+            ):
+                res[idx]["readings"].append({
+                    'sensor_id' : sensor_id,
+                    'sensor_type' : sensor_type,
+                    'sensor_unit' : sensor_units,
+                    'record_value' : value,
+                    'record_time' : time
+                })
+        idx += 1
+
     return res
