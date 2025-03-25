@@ -127,6 +127,7 @@ button[type="button"] {
     background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     width: 200px;
+    display: none;
 }
 
 .admin-login form {
@@ -165,4 +166,18 @@ button[type="button"] {
 
 .admin-login a {
     font-size: 12px;
+}
+
+.graphs-container {
+    margin-top: 20px;
+    display: flex;
+    width: 100%;
+    /* border: 20px solid #ddd; */
+    padding: 40px;
+    border-radius: 10px;
+}
+.checkbox-container {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
 }
