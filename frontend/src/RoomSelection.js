@@ -39,133 +39,142 @@ const RoomSelection = () => {
 
     useEffect(() => {
 
-        const exampleData = {
-            "modules": [
-              {
-                "module_id": 0,
-                "module_xyz": [100, 50, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "2381",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 600, "time": 1700000000 },
-                      { "value": 620, "time": 1700000600 },
-                      { "value": 630, "time": 1700001200 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "2382",
-                    "sensor_type": "temp",
-                    "sensor_units": "°C",
-                    "readings": [
-                      { "value": 21.5, "time": 1700000000 },
-                      { "value": 22.0, "time": 1700000600 },
-                      { "value": 21.8, "time": 1700001200 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 1,
-                "module_xyz": [300, 75, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "9999",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 580, "time": 1700000000 },
-                      { "value": 590, "time": 1700000600 },
-                      { "value": 610, "time": 1700001200 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "8888",
-                    "sensor_type": "humd",
-                    "sensor_units": "%",
-                    "readings": [
-                      { "value": 45, "time": 1700000000 },
-                      { "value": 47, "time": 1700000600 },
-                      { "value": 46, "time": 1700001200 }
-                    ]
-                  }
-                ]
-              }
-            ]
-          };
-        const latestExample = {
-            "modules": [
-              {
-                "module_id": 0,
-                "module_xyz": [150, 75, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "2381",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 620, "time": 1700001800 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "2382",
-                    "sensor_type": "temp",
-                    "sensor_units": "°C",
-                    "readings": [
-                      { "value": 22.3, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 1,
-                "module_xyz": [350, 200, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "8888",
-                    "sensor_type": "humd",
-                    "sensor_units": "%",
-                    "readings": [
-                      { "value": 47, "time": 1700001800 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "9999",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 680, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 2,
-                "module_xyz": [500, 300, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "5555",
-                    "sensor_type": "pm25",
-                    "sensor_units": "μg/m³",
-                    "readings": [
-                      { "value": 3.2, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              }
-            ]
-          };
+        fetchLast();
+        // fetchData(0, 1000000);
+
+        // const exampleData = {
+        //     "modules": [
+        //       {
+        //         "module_id": 0,
+        //         "module_xyz": [100, 50, 0],
+        //         "sensors": [
+        //           {
+        //             "sensor_id": "2381",
+        //             "sensor_type": "CO2",
+        //             "sensor_units": "ppm",
+        //             "readings": [
+        //               { "value": 600, "time": 1700000000 },
+        //               { "value": 620, "time": 1700000600 },
+        //               { "value": 630, "time": 1700001200 }
+        //             ]
+        //           },
+        //           {
+        //             "sensor_id": "2382",
+        //             "sensor_type": "temp",
+        //             "sensor_units": "°C",
+        //             "readings": [
+        //               { "value": 21.5, "time": 1700000000 },
+        //               { "value": 22.0, "time": 1700000600 },
+        //               { "value": 21.8, "time": 1700001200 }
+        //             ]
+        //           }
+        //         ]
+        //       },
+        //       {
+        //         "module_id": 1,
+        //         "module_xyz": [300, 75, 0],
+        //         "sensors": [
+        //           {
+        //             "sensor_id": "9999",
+        //             "sensor_type": "CO2",
+        //             "sensor_units": "ppm",
+        //             "readings": [
+        //               { "value": 580, "time": 1700000000 },
+        //               { "value": 590, "time": 1700000600 },
+        //               { "value": 610, "time": 1700001200 }
+        //             ]
+        //           },
+        //           {
+        //             "sensor_id": "8888",
+        //             "sensor_type": "humd",
+        //             "sensor_units": "%",
+        //             "readings": [
+        //               { "value": 45, "time": 1700000000 },
+        //               { "value": 47, "time": 1700000600 },
+        //               { "value": 46, "time": 1700001200 }
+        //             ]
+        //           }
+        //         ]
+        //       }
+        //     ]
+        //   };
+        // const latestExample = {
+        //     "modules": [
+        //       {
+        //         "module_id": 0,
+        //         "module_xyz": [150, 75, 0],
+        //         "sensors": [
+        //           {
+        //             "sensor_id": "2381",
+        //             "sensor_type": "CO2",
+        //             "sensor_units": "ppm",
+        //             "readings": [
+        //               { "value": 620, "time": 1700001800 }
+        //             ]
+        //           },
+        //           {
+        //             "sensor_id": "2382",
+        //             "sensor_type": "temp",
+        //             "sensor_units": "°C",
+        //             "readings": [
+        //               { "value": 22.3, "time": 1700001800 }
+        //             ]
+        //           }
+        //         ]
+        //       },
+        //       {
+        //         "module_id": 1,
+        //         "module_xyz": [350, 200, 0],
+        //         "sensors": [
+        //           {
+        //             "sensor_id": "8888",
+        //             "sensor_type": "humd",
+        //             "sensor_units": "%",
+        //             "readings": [
+        //               { "value": 47, "time": 1700001800 }
+        //             ]
+        //           },
+        //           {
+        //             "sensor_id": "9999",
+        //             "sensor_type": "CO2",
+        //             "sensor_units": "ppm",
+        //             "readings": [
+        //               { "value": 680, "time": 1700001800 }
+        //             ]
+        //           }
+        //         ]
+        //       },
+        //       {
+        //         "module_id": 2,
+        //         "module_xyz": [500, 300, 0],
+        //         "sensors": [
+        //           {
+        //             "sensor_id": "5555",
+        //             "sensor_type": "pm25",
+        //             "sensor_units": "μg/m³",
+        //             "readings": [
+        //               { "value": 3.2, "time": 1700001800 }
+        //             ]
+        //           }
+        //         ]
+        //       }
+        //     ]
+        //   };
           
-        const grouped = processSensorData(exampleData);
-        setSensorData(grouped);
+        // const grouped = processSensorData(exampleData);
+        // setSensorData(grouped);
         
-        setLatestModules(latestExample.modules);
+        // setLatestModules(latestExample.modules);
     }, []);
 
-    const fetchData = async (n) => {
-        const res = await fetch(`/get-lastn-datapoints/${n}`);
+    const fetchLast = async () => {
+        const res = await fetch('http://localhost:8000/get-latest-reading/1');
+        const data = await res.json();
+        setLatestModules(data);
+    }
+
+    const fetchData = async (start, end) => {
+        const res = await fetch(`http://localhost:8000/get-data-timerange/${start}/${end}`);
         const data = await res.json();
         setSensorData(processSensorData(data));
     };
@@ -173,11 +182,11 @@ const RoomSelection = () => {
     const processSensorData = (apiData) => {
         const grouped = {};
 
-        apiData.modules.forEach((module) => {
-            const id = parseInt(module.module_id);
-            const x = parseInt(module.module_xyz[0]);
-            const y = parseInt(module.module_xyz[1]);
-            const z = parseInt(module.module_xyz[2]);
+        apiData.forEach((module) => {
+            const id = module.module_id;
+            const x = module.module_xyz[0];
+            const y = module.module_xyz[1];
+            const z = module.module_xyz[2];
 
             module.sensors.forEach((sensor) => {
                 const sensor_id = parseInt(sensor.sensor_id);
@@ -228,13 +237,14 @@ const RoomSelection = () => {
     };
 
     useEffect(() => {
-        // Set the original image dimensions when it loads
         const img = new Image();
         img.src = floorplan;
         img.onload = () => {
-            originalSize.current = { width: img.width, height: img.height };
+          originalSize.current = { width: img.width, height: img.height };
+          fetchLast();
         };
-    }, []);
+      }, []);
+      
 
     const scalePosition = (x, y) => {
         if (!imageRef.current || !originalSize.current) return { left: 0, top: 0 };
@@ -293,34 +303,34 @@ const RoomSelection = () => {
 
     return (
         <div>
-
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
-                    {latestModules.map((module, index) => {
-                        const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
-                        return (
-                            <div
-                                key={index}
-                                className="sensor-dot"
-                                style={{ left: `${left}px`, top: `${left}px` }}
-                                onMouseEnter={(e) => {
-                                    setTooltip({
-                                        visible: true,
-                                        x: e.clientX,
-                                        y: e.clientY,
-                                        content: getTooltipContent(module)
-                                    });
-                                }}
-                                onMouseMove={(e) => {
-                                    setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
-                                }}
-                                onMouseLeave={() => {
-                                    setTooltip(prev => ({ ...prev, visible: false}));
-                                }}
-                                title={getTooltipContent(module)}
-                            />
-                        )
+                    {Array.isArray(latestModules) && 
+                        latestModules.map((module, index) => {
+                            const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                            return (
+                                <div
+                                    key={index}
+                                    className="sensor-dot"
+                                    style={{ left: `${left}px`, top: `${top}px` }}
+                                    onMouseEnter={(e) => {
+                                        setTooltip({
+                                            visible: true,
+                                            x: e.clientX,
+                                            y: e.clientY,
+                                            content: getTooltipContent(module)
+                                        });
+                                    }}
+                                    onMouseMove={(e) => {
+                                        setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                    }}
+                                    onMouseLeave={() => {
+                                        setTooltip(prev => ({ ...prev, visible: false}));
+                                    }}
+                                    title={getTooltipContent(module)}
+                                />
+                            )
                     })}
                 </div>
 
@@ -347,7 +357,7 @@ const RoomSelection = () => {
                                 </td>
                             </tr>
                             <tr>
-                                <td><label>0 - 5 μg/m^3</label></td>
+                                <td><label>0 - 5 μg/m³</label></td>
                                 <td>
                                     <label>
                                         <input 

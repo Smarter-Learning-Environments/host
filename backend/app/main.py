@@ -2,12 +2,27 @@ import psycopg2
 import pandas as pd
 from . import broker, db, sql
 from fastapi import FastAPI, Response, status
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:3001"
+]
 
 def startServer() -> FastAPI:
     broker.setup_connection()
     return FastAPI()
 
 app = startServer()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -21,6 +36,7 @@ def test_post():
 @app.get("/get-latest-reading/{room_id}")
 def get_latest_reading(room_id: int, response: Response):
     df = None
+
 
     try:
         columns, results = db.execute_sql(sql.LATEST_READINGS_QUERY, args=(room_id,), column_names=True)
@@ -38,9 +54,9 @@ def get_latest_reading(room_id: int, response: Response):
         res.append({
             "module_id": module_id,
             "module_xyz": [
-                module_df.iloc[0]['position_x'],
-                module_df.iloc[0]['position_y'],
-                module_df.iloc[0]['position_z']
+                int(module_df.iloc[0]['position_x']),
+                int(module_df.iloc[0]['position_y']),
+                int(module_df.iloc[0]['position_z'])
             ],
             "sensors": []
         })
@@ -80,9 +96,9 @@ def get_data_timerange(time_start: int, time_end: int, response: Response):
         res.append({
             "module_id": module_id,
             "module_xyz": [
-                module_df.iloc[0]['position_x'],
-                module_df.iloc[0]['position_y'],
-                module_df.iloc[0]['position_z']
+                int(module_df.iloc[0]['position_x']),
+                int(module_df.iloc[0]['position_y']),
+                int(module_df.iloc[0]['position_z'])
             ],
             "sensors": []
         })
