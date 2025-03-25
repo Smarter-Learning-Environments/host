@@ -43,4 +43,6 @@ CREATE TABLE records (
     CONSTRAINT fk_sensor FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id)
 );
 
+CREATE INDEX idx_record_time ON records (record_time);
+
 INSERT INTO records (module_id, record_time, record_value, sensor_id) VALUES (1, 1300, 18, 1);
