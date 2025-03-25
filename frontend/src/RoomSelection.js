@@ -16,114 +16,61 @@ const RoomSelection = () => {
 
     useEffect(() => {
         const exampleData = {
-            time_points: [
-                {
-                    time: "1700000000",
-                    modules: [
-                        {
-                            module_id: "0",
-                            module_xyz: ["100", "50", "0"],
-                            readings: [
-                                {
-                                    sensor_id: "2381",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "600"
-                                },
-                                {
-                                    sensor_id: "2382",
-                                    sensor_type: "temp",
-                                    sensor_units: "celsius",
-                                    value: "22"
-                                }
-                            ]
-                        },
-                        {
-                            module_id: "1",
-                            module_xyz: ["25, 25, 0"],
-                            readings: [
-                                {
-                                    sensor_id: "20",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "100"
-                                }
-                            ]
-                        }
+            "modules": [
+              {
+                "module_id": 0,
+                "module_xyz": [100, 50, 0],
+                "sensors": [
+                  {
+                    "sensor_id": "2381",
+                    "sensor_type": "CO2",
+                    "sensor_units": "ppm",
+                    "readings": [
+                      { "value": 600, "time": 1700000000 },
+                      { "value": 620, "time": 1700000600 },
+                      { "value": 630, "time": 1700001200 }
                     ]
-                },
-                {
-                    time: "1700000600",
-                    modules: [
-                        {
-                            module_id: "0",
-                            module_xyz: ["100", "50", "0"],
-                            readings: [
-                                {
-                                    sensor_id: "2381",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "630"
-                                },
-                                {
-                                    sensor_id: "2382",
-                                    sensor_type: "temp",
-                                    sensor_units: "celsius",
-                                    value: "23"
-                                }
-                            ]
-                        },
-                        {
-                            module_id: "1",
-                            module_xyz: ["25, 25, 0"],
-                            readings: [
-                                {
-                                    sensor_id: "20",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "500"
-                                }
-                            ]
-                        }
+                  },
+                  {
+                    "sensor_id": "2382",
+                    "sensor_type": "temp",
+                    "sensor_units": "°C",
+                    "readings": [
+                      { "value": 21.5, "time": 1700000000 },
+                      { "value": 22.0, "time": 1700000600 },
+                      { "value": 21.8, "time": 1700001200 }
                     ]
-                },
-                {
-                    time: "1700001200",
-                    modules: [
-                        {
-                            module_id: "0",
-                            module_xyz: ["100", "50", "0"],
-                            readings: [
-                                {
-                                    sensor_id: "2381",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "620"
-                                },
-                                {
-                                    sensor_id: "2382",
-                                    sensor_type: "temp",
-                                    sensor_units: "celsius",
-                                    value: "22.5"
-                                }
-                            ]
-                        },
-                        {
-                            module_id: "1",
-                            module_xyz: ["25, 25, 0"],
-                            readings: [
-                                {
-                                    sensor_id: "20",
-                                    sensor_type: "CO2",
-                                    sensor_units: "ppm",
-                                    value: "70"
-                                }
-                            ]
-                        }
+                  }
+                ]
+              },
+              {
+                "module_id": 1,
+                "module_xyz": [300, 75, 0],
+                "sensors": [
+                  {
+                    "sensor_id": "9999",
+                    "sensor_type": "CO2",
+                    "sensor_units": "ppm",
+                    "readings": [
+                      { "value": 580, "time": 1700000000 },
+                      { "value": 590, "time": 1700000600 },
+                      { "value": 610, "time": 1700001200 }
                     ]
-                }
+                  },
+                  {
+                    "sensor_id": "8888",
+                    "sensor_type": "humd",
+                    "sensor_units": "%",
+                    "readings": [
+                      { "value": 45, "time": 1700000000 },
+                      { "value": 47, "time": 1700000600 },
+                      { "value": 46, "time": 1700001200 }
+                    ]
+                  }
+                ]
+              }
             ]
-        };
+          };          
         const grouped = processSensorData(exampleData);
         setSensorData(grouped);
     }, []);
@@ -137,11 +84,21 @@ const RoomSelection = () => {
     const processSensorData = (apiData) => {
         const grouped = {};
 
-        apiData.time_points.forEach((point) => {
-            const time = new Date(parseInt(point.time) * 1000).toISOString();
-            point.modules.forEach((mod) => {
-                mod.readings.forEach((reading) => {
-                    const { sensor_type, sensor_id, value } = reading;
+        apiData.modules.forEach((module) => {
+            const id = parseInt(module.module_id);
+            const x = parseInt(module.module_xyz[0]);
+            const y = parseInt(module.module_xyz[1]);
+            const z = parseInt(module.module_xyz[2]);
+
+            module.sensors.forEach((sensor) => {
+                const sensor_id = parseInt(sensor.sensor_id);
+                const sensor_type = sensor.sensor_type;
+                const sensor_units = sensor.sensor_units;
+                
+                sensor.readings.forEach((reading) => {
+                    const time = new Date(parseInt(reading.time) * 1000).toISOString();
+                    const value = parseInt(reading.value);
+
                     if (!grouped[sensor_type]) grouped[sensor_type] = {};
                     if (!grouped[sensor_type][sensor_id]) {
                         grouped[sensor_type][sensor_id] = {
@@ -153,9 +110,30 @@ const RoomSelection = () => {
                         x: time,
                         y: parseFloat(value),
                     });
-                });
-            });
-        });
+                })
+            })
+
+        })
+
+        // apiData.time_points.forEach((point) => {
+        //     const time = new Date(parseInt(point.time) * 1000).toISOString();
+        //     point.modules.forEach((mod) => {
+        //         mod.readings.forEach((reading) => {
+        //             const { sensor_type, sensor_id, value } = reading;
+        //             if (!grouped[sensor_type]) grouped[sensor_type] = {};
+        //             if (!grouped[sensor_type][sensor_id]) {
+        //                 grouped[sensor_type][sensor_id] = {
+        //                     label: `Sensor ${sensor_id}`,
+        //                     data: [],
+        //                 };
+        //             }
+        //             grouped[sensor_type][sensor_id].data.push({
+        //                 x: time,
+        //                 y: parseFloat(value),
+        //             });
+        //         });
+        //     });
+        // });
 
         return grouped;
     };
