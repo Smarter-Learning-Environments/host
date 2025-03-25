@@ -20,9 +20,12 @@ body {
 .image-container {
     flex: 1;
     display: flex;
+    /* display: inline-block; */
     justify-content: center;
     align-items: center;
+    position: relative;
 }
+
 .image-container img {
     max-width: 100%;
     height: auto;
@@ -180,4 +183,22 @@ button[type="button"] {
     display: flex;
     gap: 15px;
     margin: 20px 0;
+}
+
+.sensor-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: red;
+    border-radius: 50%;
+    transform: translate(-50%, -50%); /* center the dot */
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.tooltip {
+    transition: opacity 0.2s ease;
+    max-width: 200px;
 }

@@ -11,10 +11,34 @@ const RoomSelection = () => {
         temp: false,
         humd: false,
     });
+    const [adminPass, setAdminPass] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [moduleData, setModuleData] = useState({type: "", units: ""});
+    const imageRef = useRef(null);
+    const originalSize = useRef({ width: 1, height: 1 });
+    const [tooltip, setTooltip] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        content: ""
+    });
+    const [latestModules, setLatestModules] = useState([]);
+    const navigate = useNavigate();
 
     const [sensorData, setSensorData] = useState({});
 
     useEffect(() => {
+        const handleResize = () => {
+            setLatestModules((prev) => [...prev]);
+        };
+    
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    
+
+    useEffect(() => {
+
         const exampleData = {
             "modules": [
               {
@@ -70,9 +94,74 @@ const RoomSelection = () => {
                 ]
               }
             ]
-          };          
+          };
+        const latestExample = {
+            "modules": [
+              {
+                "module_id": 0,
+                "module_xyz": [150, 75, 0],
+                "sensors": [
+                  {
+                    "sensor_id": "2381",
+                    "sensor_type": "CO2",
+                    "sensor_units": "ppm",
+                    "readings": [
+                      { "value": 620, "time": 1700001800 }
+                    ]
+                  },
+                  {
+                    "sensor_id": "2382",
+                    "sensor_type": "temp",
+                    "sensor_units": "°C",
+                    "readings": [
+                      { "value": 22.3, "time": 1700001800 }
+                    ]
+                  }
+                ]
+              },
+              {
+                "module_id": 1,
+                "module_xyz": [350, 200, 0],
+                "sensors": [
+                  {
+                    "sensor_id": "8888",
+                    "sensor_type": "humd",
+                    "sensor_units": "%",
+                    "readings": [
+                      { "value": 47, "time": 1700001800 }
+                    ]
+                  },
+                  {
+                    "sensor_id": "9999",
+                    "sensor_type": "CO2",
+                    "sensor_units": "ppm",
+                    "readings": [
+                      { "value": 680, "time": 1700001800 }
+                    ]
+                  }
+                ]
+              },
+              {
+                "module_id": 2,
+                "module_xyz": [500, 300, 0],
+                "sensors": [
+                  {
+                    "sensor_id": "5555",
+                    "sensor_type": "pm25",
+                    "sensor_units": "μg/m³",
+                    "readings": [
+                      { "value": 3.2, "time": 1700001800 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          };
+          
         const grouped = processSensorData(exampleData);
         setSensorData(grouped);
+        
+        setLatestModules(latestExample.modules);
     }, []);
 
     const fetchData = async (n) => {
@@ -138,14 +227,6 @@ const RoomSelection = () => {
         return grouped;
     };
 
-    const [adminPass, setAdminPass] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [moduleData, setModuleData] = useState({type: "", units: ""});
-    const imageRef = useRef(null);
-    const originalSize = useRef({ width: 1, height: 1 });
-
-    const navigate = useNavigate();
-
     useEffect(() => {
         // Set the original image dimensions when it loads
         const img = new Image();
@@ -155,6 +236,30 @@ const RoomSelection = () => {
         };
     }, []);
 
+    const scalePosition = (x, y) => {
+        if (!imageRef.current || !originalSize.current) return { left: 0, top: 0 };
+    
+        const rect = imageRef.current.getBoundingClientRect();
+    
+        const scaleX = rect.width / originalSize.current.width;
+        const scaleY = rect.height / originalSize.current.height;
+    
+        return {
+            left: x * scaleX,
+            top: y * scaleY
+        };
+    };
+
+    const getTooltipContent = (module) => {
+        return (
+            `<strong>Module ID:</strong> ${module.module_id}<br/>` +
+            module.sensors.map(sensor => {
+                const latest = sensor.readings.at(-1); // Get the most recent reading
+                return `${sensor.sensor_type}: ${latest.value} ${sensor.sensor_units}`;
+            }).join("<br/>")
+        );
+    };
+    
     const handleCheckboxChange = (event) => {
         const { id, checked } = event.target;
         setSelectedFactors((prev) => ({
@@ -192,6 +297,31 @@ const RoomSelection = () => {
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
+                    {latestModules.map((module, index) => {
+                        const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                        return (
+                            <div
+                                key={index}
+                                className="sensor-dot"
+                                style={{ left: `${left}px`, top: `${left}px` }}
+                                onMouseEnter={(e) => {
+                                    setTooltip({
+                                        visible: true,
+                                        x: e.clientX,
+                                        y: e.clientY,
+                                        content: getTooltipContent(module)
+                                    });
+                                }}
+                                onMouseMove={(e) => {
+                                    setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                }}
+                                onMouseLeave={() => {
+                                    setTooltip(prev => ({ ...prev, visible: false}));
+                                }}
+                                title={getTooltipContent(module)}
+                            />
+                        )
+                    })}
                 </div>
 
                 <div className="checkbox-container">
@@ -290,6 +420,27 @@ const RoomSelection = () => {
                     {errorMessage && <p className="error">{errorMessage}</p>}
                 </form>
             </div>
+
+            {tooltip.visible && (
+                <div
+                    className="tooltip"
+                    style={{
+                        position: "fixed",
+                        left: tooltip.x + 10,
+                        top: tooltip.y + 10,
+                        background: "white",
+                        border: "1px solid #ccc",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
+                        zIndex: 999,
+                        pointerEvents: "none",
+                        fontSize: "12px"
+                    }}
+                    dangerouslySetInnerHTML={{ __html: tooltip.content }}
+                />
+            )}
+
         </div>
     );
 };
