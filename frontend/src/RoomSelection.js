@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import floorplan from "./floorplan_0.png";
 import SensorGraph from "./SensorGraph";
+import DateTimePicker from 'react-datetime-picker';
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -23,6 +24,8 @@ const RoomSelection = () => {
     });
     const [latestModules, setLatestModules] = useState([]);
     const [sensorData, setSensorData] = useState([]);
+    const [startTime, setStartTime] = useState(0);
+    const [endTime, setEndTime] = useState(0);
     const navigate = useNavigate();
 
 
@@ -165,8 +168,21 @@ const RoomSelection = () => {
         }
     };
 
+    const handleStartPick = (e) => {
+        setStartTime(e.target.value);
+    }
+    const handleEndPick = (e) => {
+        setEndTime(e.target.value);
+    }
+    const handleTimeSubmit = () => {
+        const startMS = Math.floor(new Date(startTime).getTime()/1000);
+        const endMS = Math.floor(new Date(endTime).getTime()/1000);
+        console.log(`Start: ${startMS}, end: ${endMS}`);
+        fetchData(startMS, endMS);
+    }
+
     return (
-        <div>
+        <div className="main-container">
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
@@ -262,6 +278,20 @@ const RoomSelection = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            
+            <div className="timerangeinput">
+                <table>
+                    <tr>
+                        <td><label>Start</label></td>
+                        <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
+                    </tr>
+                    <tr>
+                        <td><label>End</label></td>
+                        <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
+                    </tr>
+                </table>
+                    <button id="submittime" onClick={handleTimeSubmit}>Submit</button>
             </div>
 
             <div className="graphs-container">
