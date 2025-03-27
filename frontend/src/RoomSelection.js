@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import floorplan from "./floorplan_0.png";
 import SensorGraph from "./SensorGraph";
-import DateTimePicker from 'react-datetime-picker';
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -24,8 +23,11 @@ const RoomSelection = () => {
     });
     const [latestModules, setLatestModules] = useState([]);
     const [sensorData, setSensorData] = useState([]);
-    const [startTime, setStartTime] = useState(0);
-    const [endTime, setEndTime] = useState(0);
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [isNoData, setIsNoData] = useState(false);
+    const [firstDataFetch, setFirstDataFetch] = useState(true);
+
     const navigate = useNavigate();
 
 
@@ -41,7 +43,7 @@ const RoomSelection = () => {
     useEffect(() => {
         const fetchBoth = async () => {
             await fetchLast();
-            setTimeout(() => fetchData(0, 1000000), 100);
+            setTimeout(() => fetchData(), 100);
         }
         fetchBoth();
     }, []);
@@ -56,12 +58,20 @@ const RoomSelection = () => {
         }
     };
 
-    const fetchData = async (start, end) => {
+    const fetchData = async () => {
 
         try {
-            const res = await fetch(`http://localhost:8000/get-data-timerange/${start}/${end}`);
+            const startMS = Math.floor(new Date(startTime).getTime()/1000);
+            const endMS = Math.floor(new Date(endTime).getTime()/1000);
+            console.log(`Start: ${startMS}, end: ${endMS}`);
+            const res = await fetch(`http://localhost:8000/get-data-timerange/${startMS}/${endMS}`);
             const data = await res.json();
+
+            setIsNoData(!firstDataFetch && Object.keys(data).length === 0);
+            setFirstDataFetch(false);
+
             setSensorData(processSensorData(data));
+
         } catch (err) {
             console.error("Error fetching data timerange: ", err);
         }
@@ -175,10 +185,7 @@ const RoomSelection = () => {
         setEndTime(e.target.value);
     }
     const handleTimeSubmit = () => {
-        const startMS = Math.floor(new Date(startTime).getTime()/1000);
-        const endMS = Math.floor(new Date(endTime).getTime()/1000);
-        console.log(`Start: ${startMS}, end: ${endMS}`);
-        fetchData(startMS, endMS);
+        fetchData();
     }
 
     return (
@@ -208,13 +215,12 @@ const RoomSelection = () => {
                                     onMouseLeave={() => {
                                         setTooltip(prev => ({ ...prev, visible: false}));
                                     }}
-                                    title={getTooltipContent(module)}
                                 />
                             )
                     })}
                 </div>
 
-                <div className="checkbox-container">
+                {/* <div className="checkbox-container">
                     <table>
                         <thead>
                             <tr>
@@ -277,11 +283,11 @@ const RoomSelection = () => {
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div> */}
             </div>
             
             <div className="timerangeinput">
-                <table>
+                <table><tbody>
                     <tr>
                         <td><label>Start</label></td>
                         <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
@@ -290,25 +296,26 @@ const RoomSelection = () => {
                         <td><label>End</label></td>
                         <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
                     </tr>
-                </table>
+                </tbody></table>
                     <button id="submittime" onClick={handleTimeSubmit}>Submit</button>
             </div>
 
             <div className="graphs-container">
+                {isNoData && (
+                    <label className="nodatalabel">No data found in selected Time Range!</label> )}
                 {Object.entries(sensorData).map(([sensorType, sensors], idx) =>
-                    selectedFactors[sensorType.toLowerCase()] ? (
-                        <SensorGraph
-                            key={sensorType}
-                            title={sensorType}
-                            sensorSeries={Object.values(sensors).map((s, i) => ({
-                                ...s,
-                                colorIndex: i
-                            }))}
-                        />
-                    ) : null
+                        <div className="graph-bg">
+                            <SensorGraph
+                                key={sensorType}
+                                title={sensorType}
+                                sensorSeries={Object.values(sensors).map((s, i) => ({
+                                    ...s,
+                                    colorIndex: i
+                                }))}
+                            />
+                        </div>
                 )}
             </div>
-
             <div className="admin-login">
                 <a href="https://youtube.com" target="_blank">¡Toma nuestra encuesta!</a>
                 <form onSubmit={handleLogin}>
