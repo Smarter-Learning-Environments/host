@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import floorplan from "./floorplan_0.png";
@@ -13,7 +13,6 @@ const RoomSelection = () => {
     });
     const [adminPass, setAdminPass] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [moduleData, setModuleData] = useState({type: "", units: ""});
     const imageRef = useRef(null);
     const originalSize = useRef({ width: 1, height: 1 });
     const [tooltip, setTooltip] = useState({
@@ -23,11 +22,16 @@ const RoomSelection = () => {
         content: ""
     });
     const [latestModules, setLatestModules] = useState([]);
+    const [sensorData, setSensorData] = useState([]);
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [isNoData, setIsNoData] = useState(false);
+    const [firstDataFetch, setFirstDataFetch] = useState(true);
+
     const navigate = useNavigate();
 
-    const [sensorData, setSensorData] = useState({});
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const handleResize = () => {
             setLatestModules((prev) => [...prev]);
         };
@@ -36,148 +40,51 @@ const RoomSelection = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
     
-
     useEffect(() => {
-
-        const exampleData = {
-            "modules": [
-              {
-                "module_id": 0,
-                "module_xyz": [100, 50, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "2381",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 600, "time": 1700000000 },
-                      { "value": 620, "time": 1700000600 },
-                      { "value": 630, "time": 1700001200 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "2382",
-                    "sensor_type": "temp",
-                    "sensor_units": "°C",
-                    "readings": [
-                      { "value": 21.5, "time": 1700000000 },
-                      { "value": 22.0, "time": 1700000600 },
-                      { "value": 21.8, "time": 1700001200 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 1,
-                "module_xyz": [300, 75, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "9999",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 580, "time": 1700000000 },
-                      { "value": 590, "time": 1700000600 },
-                      { "value": 610, "time": 1700001200 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "8888",
-                    "sensor_type": "humd",
-                    "sensor_units": "%",
-                    "readings": [
-                      { "value": 45, "time": 1700000000 },
-                      { "value": 47, "time": 1700000600 },
-                      { "value": 46, "time": 1700001200 }
-                    ]
-                  }
-                ]
-              }
-            ]
-          };
-        const latestExample = {
-            "modules": [
-              {
-                "module_id": 0,
-                "module_xyz": [150, 75, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "2381",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 620, "time": 1700001800 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "2382",
-                    "sensor_type": "temp",
-                    "sensor_units": "°C",
-                    "readings": [
-                      { "value": 22.3, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 1,
-                "module_xyz": [350, 200, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "8888",
-                    "sensor_type": "humd",
-                    "sensor_units": "%",
-                    "readings": [
-                      { "value": 47, "time": 1700001800 }
-                    ]
-                  },
-                  {
-                    "sensor_id": "9999",
-                    "sensor_type": "CO2",
-                    "sensor_units": "ppm",
-                    "readings": [
-                      { "value": 680, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              },
-              {
-                "module_id": 2,
-                "module_xyz": [500, 300, 0],
-                "sensors": [
-                  {
-                    "sensor_id": "5555",
-                    "sensor_type": "pm25",
-                    "sensor_units": "μg/m³",
-                    "readings": [
-                      { "value": 3.2, "time": 1700001800 }
-                    ]
-                  }
-                ]
-              }
-            ]
-          };
-          
-        const grouped = processSensorData(exampleData);
-        setSensorData(grouped);
-        
-        setLatestModules(latestExample.modules);
+        const fetchBoth = async () => {
+            await fetchLast();
+            setTimeout(() => fetchData(), 100);
+        }
+        fetchBoth();
     }, []);
+ 
+    const fetchLast = async () => {
+        try {
+            const res = await fetch('http://localhost:8000/get-latest-reading/1');
+            const data = await res.json();
+            setLatestModules(data);
+        } catch (err) {
+            console.error("Error fetching lateest: ", err);
+        }
+    };
 
-    const fetchData = async (n) => {
-        const res = await fetch(`/get-lastn-datapoints/${n}`);
-        const data = await res.json();
-        setSensorData(processSensorData(data));
+    const fetchData = async () => {
+
+        try {
+            const startMS = Math.floor(new Date(startTime).getTime()/1000);
+            const endMS = Math.floor(new Date(endTime).getTime()/1000);
+            console.log(`Start: ${startMS}, end: ${endMS}`);
+            const res = await fetch(`http://localhost:8000/get-data-timerange/${startMS}/${endMS}`);
+            const data = await res.json();
+
+            setIsNoData(!firstDataFetch && Object.keys(data).length === 0);
+            setFirstDataFetch(false);
+
+            setSensorData(processSensorData(data));
+
+        } catch (err) {
+            console.error("Error fetching data timerange: ", err);
+        }
     };
 
     const processSensorData = (apiData) => {
         const grouped = {};
 
-        apiData.modules.forEach((module) => {
-            const id = parseInt(module.module_id);
-            const x = parseInt(module.module_xyz[0]);
-            const y = parseInt(module.module_xyz[1]);
-            const z = parseInt(module.module_xyz[2]);
+        apiData.forEach((module) => {
+            const id = module.module_id;
+            const x = module.module_xyz[0];
+            const y = module.module_xyz[1];
+            const z = module.module_xyz[2];
 
             module.sensors.forEach((sensor) => {
                 const sensor_id = parseInt(sensor.sensor_id);
@@ -204,37 +111,17 @@ const RoomSelection = () => {
 
         })
 
-        // apiData.time_points.forEach((point) => {
-        //     const time = new Date(parseInt(point.time) * 1000).toISOString();
-        //     point.modules.forEach((mod) => {
-        //         mod.readings.forEach((reading) => {
-        //             const { sensor_type, sensor_id, value } = reading;
-        //             if (!grouped[sensor_type]) grouped[sensor_type] = {};
-        //             if (!grouped[sensor_type][sensor_id]) {
-        //                 grouped[sensor_type][sensor_id] = {
-        //                     label: `Sensor ${sensor_id}`,
-        //                     data: [],
-        //                 };
-        //             }
-        //             grouped[sensor_type][sensor_id].data.push({
-        //                 x: time,
-        //                 y: parseFloat(value),
-        //             });
-        //         });
-        //     });
-        // });
-
         return grouped;
     };
 
     useEffect(() => {
-        // Set the original image dimensions when it loads
         const img = new Image();
         img.src = floorplan;
         img.onload = () => {
-            originalSize.current = { width: img.width, height: img.height };
+          originalSize.current = { width: img.width, height: img.height };
         };
-    }, []);
+      }, []);
+      
 
     const scalePosition = (x, y) => {
         if (!imageRef.current || !originalSize.current) return { left: 0, top: 0 };
@@ -291,40 +178,49 @@ const RoomSelection = () => {
         }
     };
 
-    return (
-        <div>
+    const handleStartPick = (e) => {
+        setStartTime(e.target.value);
+    }
+    const handleEndPick = (e) => {
+        setEndTime(e.target.value);
+    }
+    const handleTimeSubmit = () => {
+        fetchData();
+    }
 
+    return (
+        <div className="main-container">
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
-                    {latestModules.map((module, index) => {
-                        const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
-                        return (
-                            <div
-                                key={index}
-                                className="sensor-dot"
-                                style={{ left: `${left}px`, top: `${left}px` }}
-                                onMouseEnter={(e) => {
-                                    setTooltip({
-                                        visible: true,
-                                        x: e.clientX,
-                                        y: e.clientY,
-                                        content: getTooltipContent(module)
-                                    });
-                                }}
-                                onMouseMove={(e) => {
-                                    setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
-                                }}
-                                onMouseLeave={() => {
-                                    setTooltip(prev => ({ ...prev, visible: false}));
-                                }}
-                                title={getTooltipContent(module)}
-                            />
-                        )
+                    {Array.isArray(latestModules) && 
+                        latestModules.map((module, index) => {
+                            const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                            return (
+                                <div
+                                    key={index}
+                                    className="sensor-dot"
+                                    style={{ left: `${left}px`, top: `${top}px` }}
+                                    onMouseEnter={(e) => {
+                                        setTooltip({
+                                            visible: true,
+                                            x: e.clientX,
+                                            y: e.clientY,
+                                            content: getTooltipContent(module)
+                                        });
+                                    }}
+                                    onMouseMove={(e) => {
+                                        setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                    }}
+                                    onMouseLeave={() => {
+                                        setTooltip(prev => ({ ...prev, visible: false}));
+                                    }}
+                                />
+                            )
                     })}
                 </div>
 
-                <div className="checkbox-container">
+                {/* <div className="checkbox-container">
                     <table>
                         <thead>
                             <tr>
@@ -347,7 +243,7 @@ const RoomSelection = () => {
                                 </td>
                             </tr>
                             <tr>
-                                <td><label>0 - 5 μg/m^3</label></td>
+                                <td><label>0 - 5 μg/m³</label></td>
                                 <td>
                                     <label>
                                         <input 
@@ -387,24 +283,39 @@ const RoomSelection = () => {
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div> */}
+            </div>
+            
+            <div className="timerangeinput">
+                <table><tbody>
+                    <tr>
+                        <td><label>Start</label></td>
+                        <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
+                    </tr>
+                    <tr>
+                        <td><label>End</label></td>
+                        <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
+                    </tr>
+                </tbody></table>
+                    <button id="submittime" onClick={handleTimeSubmit}>Submit</button>
             </div>
 
             <div className="graphs-container">
+                {isNoData && (
+                    <label className="nodatalabel">No data found in selected Time Range!</label> )}
                 {Object.entries(sensorData).map(([sensorType, sensors], idx) =>
-                    selectedFactors[sensorType.toLowerCase()] ? (
-                        <SensorGraph
-                            key={sensorType}
-                            title={sensorType}
-                            sensorSeries={Object.values(sensors).map((s, i) => ({
-                                ...s,
-                                colorIndex: i
-                            }))}
-                        />
-                    ) : null
+                        <div className="graph-bg">
+                            <SensorGraph
+                                key={sensorType}
+                                title={sensorType}
+                                sensorSeries={Object.values(sensors).map((s, i) => ({
+                                    ...s,
+                                    colorIndex: i
+                                }))}
+                            />
+                        </div>
                 )}
             </div>
-
             <div className="admin-login">
                 <a href="https://youtube.com" target="_blank">¡Toma nuestra encuesta!</a>
                 <form onSubmit={handleLogin}>
