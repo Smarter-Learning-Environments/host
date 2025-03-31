@@ -39,6 +39,7 @@ def on_message(client, userdata, msg: mqtt.MQTTMessage):
         print(f"{type(e)} {e.pgerror}")
 
     # TODO db dump
+    
 
 def setup_connection(host: str = utils.ENV_VARS.MQTT_BROKER_HOST, port: int = 1883, keepalive: int = 60):
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)

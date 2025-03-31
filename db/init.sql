@@ -19,7 +19,7 @@ CREATE TABLE modules (
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
-INSERT INTO modules (room_id, model) VALUES (1, 'UNKNOWN_MODEL');
+INSERT INTO modules (room_id, model, position_x, position_y, position_z) VALUES (1, 'UNKNOWN_MODEL', 0, 0, 0);
 
 CREATE TABLE sensors (
     sensor_id SERIAL PRIMARY KEY,

@@ -43,7 +43,6 @@ def get_latest_reading(room_id: int, response: Response):
 
     try:
         columns, results = db.execute_sql(sql.LATEST_READINGS_QUERY, args=(room_id,), column_names=True)
-        print(columns)
         df = pd.DataFrame(results, columns=columns)
     except psycopg2.Error as e:
         # TODO more granular error codes
@@ -57,7 +56,7 @@ def get_latest_reading(room_id: int, response: Response):
         res.append({
             "module_id": module_id,
             "module_xyz": [
-                int(module_df.iloc[0]['position_x']),
+                int(module_df.iloc[0]['position_x']), # TODO fix nonetype error
                 int(module_df.iloc[0]['position_y']),
                 int(module_df.iloc[0]['position_z'])
             ],

@@ -10,6 +10,11 @@ services:
       - ./broker/data:/mosquitto/data
       - ./broker/log:/mosquitto/log
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   postgres:
     image: postgres:latest
@@ -19,11 +24,15 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
+      POSTGRES_DB: mydb # TODO use secrets
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "$POSTGRES_DB"]
+      interval: 30s
+      timeout: 60s
 
   backend:
     build: ./backend
@@ -44,6 +53,11 @@ services:
     volumes:
       - ./backend/app:/backend/app
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8000"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
 
   frontend:
     build: ./frontend
