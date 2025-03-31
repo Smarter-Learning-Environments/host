@@ -1,3 +1,21 @@
+# /status
+
+**GET**
+Status of server and modules. Container health, connection information, last message, logs. 
+
+```json
+200:
+{
+    "msg" : "Hello, World"
+}
+
+400:
+{
+    "msg" : "Goodbye, World"
+}
+```
+
+
 # /get-latest-reading/{room_id}
 
 **GET**

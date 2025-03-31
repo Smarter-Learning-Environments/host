@@ -26,6 +26,9 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
+    # TODO health/status endpoint for modules
+    # TODO health/status endpoint for docker
+    # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
 
 @app.post("/test-post")
@@ -40,7 +43,6 @@ def get_latest_reading(room_id: int, response: Response):
 
     try:
         columns, results = db.execute_sql(sql.LATEST_READINGS_QUERY, args=(room_id,), column_names=True)
-        print(columns)
         df = pd.DataFrame(results, columns=columns)
     except psycopg2.Error as e:
         # TODO more granular error codes
@@ -54,7 +56,7 @@ def get_latest_reading(room_id: int, response: Response):
         res.append({
             "module_id": module_id,
             "module_xyz": [
-                int(module_df.iloc[0]['position_x']),
+                int(module_df.iloc[0]['position_x']), # TODO fix nonetype error
                 int(module_df.iloc[0]['position_y']),
                 int(module_df.iloc[0]['position_z'])
             ],
@@ -87,6 +89,7 @@ def get_data_timerange(time_start: int, time_end: int, response: Response):
         # TODO more granular error codes
         # TODO 404 Time range returns no result
         # TODO Query params to filter by module? Room? Sensor 
+        # TODO room id...
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
     

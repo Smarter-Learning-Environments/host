@@ -1,5 +1,5 @@
 import psycopg2
-from . import utils as utils
+from . import utils
 
 conn = psycopg2.connect(
     database=utils.ENV_VARS.DB_NAME,
@@ -29,3 +29,4 @@ def execute_sql(sql: str, args: tuple = None, column_names: bool = False, conn =
             
             if(column_names):
                 return([desc[0] for desc in curs.description], curs.fetchall())
+
