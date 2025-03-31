@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import floorplan from "./floorplan_0.png";
+import SensorGraph from "./SensorGraph";
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -10,24 +11,142 @@ const RoomSelection = () => {
         temp: false,
         humd: false,
     });
-
     const [adminPass, setAdminPass] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [moduleData, setModuleData] = useState({type: "", units: ""});
     const imageRef = useRef(null);
     const originalSize = useRef({ width: 1, height: 1 });
+    const [tooltip, setTooltip] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        content: ""
+    });
+    const [latestModules, setLatestModules] = useState([]);
+    const [sensorData, setSensorData] = useState([]);
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [isNoData, setIsNoData] = useState(false);
+    const [firstDataFetch, setFirstDataFetch] = useState(true);
 
     const navigate = useNavigate();
 
+
+    useLayoutEffect(() => {
+        const handleResize = () => {
+            setLatestModules((prev) => [...prev]);
+        };
+    
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    
     useEffect(() => {
-        // Set the original image dimensions when it loads
+        const fetchBoth = async () => {
+            await fetchLast();
+            setTimeout(() => fetchData(), 100);
+        }
+        fetchBoth();
+    }, []);
+ 
+    const fetchLast = async () => {
+        try {
+            const res = await fetch('http://localhost:8000/get-latest-reading/1');
+            const data = await res.json();
+            setLatestModules(data);
+        } catch (err) {
+            console.error("Error fetching lateest: ", err);
+        }
+    };
+
+    const fetchData = async () => {
+
+        try {
+            const startMS = Math.floor(new Date(startTime).getTime()/1000);
+            const endMS = Math.floor(new Date(endTime).getTime()/1000);
+            console.log(`Start: ${startMS}, end: ${endMS}`);
+            const res = await fetch(`http://localhost:8000/get-data-timerange/${startMS}/${endMS}`);
+            const data = await res.json();
+
+            setIsNoData(!firstDataFetch && Object.keys(data).length === 0);
+            setFirstDataFetch(false);
+
+            setSensorData(processSensorData(data));
+
+        } catch (err) {
+            console.error("Error fetching data timerange: ", err);
+        }
+    };
+
+    const processSensorData = (apiData) => {
+        const grouped = {};
+
+        apiData.forEach((module) => {
+            const id = module.module_id;
+            const x = module.module_xyz[0];
+            const y = module.module_xyz[1];
+            const z = module.module_xyz[2];
+
+            module.sensors.forEach((sensor) => {
+                const sensor_id = parseInt(sensor.sensor_id);
+                const sensor_type = sensor.sensor_type;
+                const sensor_units = sensor.sensor_units;
+                
+                sensor.readings.forEach((reading) => {
+                    const time = new Date(parseInt(reading.time) * 1000).toISOString();
+                    const value = parseInt(reading.value);
+
+                    if (!grouped[sensor_type]) grouped[sensor_type] = {};
+                    if (!grouped[sensor_type][sensor_id]) {
+                        grouped[sensor_type][sensor_id] = {
+                            label: `Sensor ${sensor_id}`,
+                            data: [],
+                        };
+                    }
+                    grouped[sensor_type][sensor_id].data.push({
+                        x: time,
+                        y: parseFloat(value),
+                    });
+                })
+            })
+
+        })
+
+        return grouped;
+    };
+
+    useEffect(() => {
         const img = new Image();
         img.src = floorplan;
         img.onload = () => {
-            originalSize.current = { width: img.width, height: img.height };
+          originalSize.current = { width: img.width, height: img.height };
         };
-    }, []);
+      }, []);
+      
 
+    const scalePosition = (x, y) => {
+        if (!imageRef.current || !originalSize.current) return { left: 0, top: 0 };
+    
+        const rect = imageRef.current.getBoundingClientRect();
+    
+        const scaleX = rect.width / originalSize.current.width;
+        const scaleY = rect.height / originalSize.current.height;
+    
+        return {
+            left: x * scaleX,
+            top: y * scaleY
+        };
+    };
+
+    const getTooltipContent = (module) => {
+        return (
+            `<strong>Module ID:</strong> ${module.module_id}<br/>` +
+            module.sensors.map(sensor => {
+                const latest = sensor.readings.at(-1); // Get the most recent reading
+                return `${sensor.sensor_type}: ${latest.value} ${sensor.sensor_units}`;
+            }).join("<br/>")
+        );
+    };
+    
     const handleCheckboxChange = (event) => {
         const { id, checked } = event.target;
         setSelectedFactors((prev) => ({
@@ -59,76 +178,144 @@ const RoomSelection = () => {
         }
     };
 
+    const handleStartPick = (e) => {
+        setStartTime(e.target.value);
+    }
+    const handleEndPick = (e) => {
+        setEndTime(e.target.value);
+    }
+    const handleTimeSubmit = () => {
+        fetchData();
+    }
+
     return (
-        <div className="container">
-            <div className="image-container">
-                <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
+        <div className="main-container">
+            <div className="container">
+                <div className="image-container">
+                    <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
+                    {Array.isArray(latestModules) && 
+                        latestModules.map((module, index) => {
+                            const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                            return (
+                                <div
+                                    key={index}
+                                    className="sensor-dot"
+                                    style={{ left: `${left}px`, top: `${top}px` }}
+                                    onMouseEnter={(e) => {
+                                        setTooltip({
+                                            visible: true,
+                                            x: e.clientX,
+                                            y: e.clientY,
+                                            content: getTooltipContent(module)
+                                        });
+                                    }}
+                                    onMouseMove={(e) => {
+                                        setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                    }}
+                                    onMouseLeave={() => {
+                                        setTooltip(prev => ({ ...prev, visible: false}));
+                                    }}
+                                />
+                            )
+                    })}
+                </div>
+
+                {/* <div className="checkbox-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><b>Niveles Recomendados</b></th>
+                                <th><b>Factores Ambientales</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><label>0 - 1000ppm</label></td>
+                                <td>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            id="co2" 
+                                            checked={selectedFactors.co2}
+                                            onChange={handleCheckboxChange}
+                                        /> CO2
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label>0 - 5 μg/m³</label></td>
+                                <td>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            id="pm25" 
+                                            checked={selectedFactors.pm25}
+                                            onChange={handleCheckboxChange} 
+                                        /> PM2.5
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label>15 - 27°C</label></td>
+                                <td>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            id="temp" 
+                                            checked={selectedFactors.temp}
+                                            onChange={handleCheckboxChange} 
+                                        /> Temperatura
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label>30% - 60%</label></td>
+                                <td>
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            id="humd" 
+                                            checked={selectedFactors.humd}
+                                            onChange={handleCheckboxChange} 
+                                        /> Humedad
+                                    </label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> */}
             </div>
-            <div className="checkbox-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th><b>Niveles Seguros</b></th>
-                            <th><b>Factores Ambientales</b></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><label>0 - 1000ppm</label></td>
-                            <td>
-                                <label>
-                                    <input 
-                                        type="checkbox" 
-                                        id="co2" 
-                                        checked={selectedFactors.co2}
-                                        onChange={handleCheckboxChange}
-                                    /> CO2
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label>0 - 5 μg/m^3</label></td>
-                            <td>
-                                <label>
-                                    <input 
-                                        type="checkbox" 
-                                        id="pm25" 
-                                        checked={selectedFactors.pm25}
-                                        onChange={handleCheckboxChange} 
-                                    /> PM2.5
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label>15 - 27°C</label></td>
-                            <td>
-                                <label>
-                                    <input 
-                                        type="checkbox" 
-                                        id="temp" 
-                                        checked={selectedFactors.temp}
-                                        onChange={handleCheckboxChange} 
-                                    /> Temperatura
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label>30% - 60%</label></td>
-                            <td>
-                                <label>
-                                    <input 
-                                        type="checkbox" 
-                                        id="humd" 
-                                        checked={selectedFactors.humd}
-                                        onChange={handleCheckboxChange} 
-                                    /> Humedad
-                                </label>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            
+            <div className="timerangeinput">
+                <table><tbody>
+                    <tr>
+                        <td><label>Start</label></td>
+                        <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
+                    </tr>
+                    <tr>
+                        <td><label>End</label></td>
+                        <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
+                    </tr>
+                </tbody></table>
+                    <button id="submittime" onClick={handleTimeSubmit}>Submit</button>
             </div>
 
+            <div className="graphs-container">
+                {isNoData && (
+                    <label className="nodatalabel">No data found in selected Time Range!</label> )}
+                {Object.entries(sensorData).map(([sensorType, sensors], idx) =>
+                        <div className="graph-bg">
+                            <SensorGraph
+                                key={sensorType}
+                                title={sensorType}
+                                sensorSeries={Object.values(sensors).map((s, i) => ({
+                                    ...s,
+                                    colorIndex: i
+                                }))}
+                            />
+                        </div>
+                )}
+            </div>
             <div className="admin-login">
                 <a href="https://youtube.com" target="_blank">¡Toma nuestra encuesta!</a>
                 <form onSubmit={handleLogin}>
@@ -144,6 +331,27 @@ const RoomSelection = () => {
                     {errorMessage && <p className="error">{errorMessage}</p>}
                 </form>
             </div>
+
+            {tooltip.visible && (
+                <div
+                    className="tooltip"
+                    style={{
+                        position: "fixed",
+                        left: tooltip.x + 10,
+                        top: tooltip.y + 10,
+                        background: "white",
+                        border: "1px solid #ccc",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
+                        zIndex: 999,
+                        pointerEvents: "none",
+                        fontSize: "12px"
+                    }}
+                    dangerouslySetInnerHTML={{ __html: tooltip.content }}
+                />
+            )}
+
         </div>
     );
 };

@@ -1,0 +1,1 @@
+1. Update graphs while typing // On submit button

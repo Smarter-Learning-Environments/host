@@ -14,7 +14,7 @@ ORDER BY sensors.sensor_id, records.record_time DESC;
 """ # params: Room ID
 
 READINGS_TIMERANGE_QUERY = """
-SELECT DISTINCT ON (sensors.sensor_id) 
+SELECT
     sensors.sensor_id,
     sensors.sensor_type, 
     sensors.sensor_unit, 

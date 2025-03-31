@@ -1,7 +1,7 @@
-## /get-latest-reading/{room_id}
-Asks for latest reading of a certain room    
+# /get-latest-reading/{room_id}
 
-GET
+**GET**
+Asks for latest reading of a certain room    
 
 ```json
 200:
@@ -44,10 +44,10 @@ GET
 ```
 
 ## /place-module
+**GET**
 When the admin of a classroom clicks a location on the map, they an input a module with different sensor types. The module and corresponding sensors are then added to the database
 
 ```json
-POST:
 {
     "room_id" : 1,
     "x" : 50,
@@ -76,10 +76,10 @@ POST:
 ```
 
 ## /login-administrator
+**POST**
 Takes admin password and logs them in
 
 ```json
-POST:
 {
     "room_id" : "1",
     "password" : "admin123"
@@ -97,10 +97,10 @@ POST:
 ```
 
 ## /set-administrator
+**POST**
 sets admin password the first time admin is clicked
 
 ```json
-POST:
 {
     "room_id" : "1",
     "password" : "admin123"
@@ -118,11 +118,10 @@ POST:
 ```
 
 ## /get-data-timerange/{time_start}/{time_end?}
+**GET**
 gets all data points from start time to current, or specified end time
 
 ```json
-GET
-
 200:
 {
     "time_points" : 
@@ -159,11 +158,10 @@ GET
 
 
 ## /get-lastn-datapoints/{n}
+**GET**
 gets most recent n datapoints from each sensor
 
 ```json
-GET
-
 {
     "time_points" : 
         [
