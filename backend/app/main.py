@@ -11,6 +11,9 @@ app = startServer()
 
 @app.get("/")
 def read_root():
+    # TODO health/status endpoint for modules
+    # TODO health/status endpoint for docker
+    # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
 
 @app.post("/test-post")
@@ -71,6 +74,7 @@ def get_data_timerange(time_start: int, time_end: int, response: Response):
         # TODO more granular error codes
         # TODO 404 Time range returns no result
         # TODO Query params to filter by module? Room? Sensor 
+        # TODO room id...
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
     
