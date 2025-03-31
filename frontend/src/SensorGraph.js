@@ -37,7 +37,8 @@ const SensorGraph = ({ title, sensorSeries }) => {
         y.domain([0, d3.max(allPoints, d => d.y)*1.1]);
 
         const xAxis = d3.axisBottom(x).ticks(5);
-        const yAxis = d3.axisLeft(y);
+        const yTicks = Math.max(2, Math.floor(height/50));
+        const yAxis = d3.axisLeft(y).ticks(yTicks);
 
         svg.attr("width", width).attr("height", height);
 
@@ -56,7 +57,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
             .attr("y", height - 10)
             .attr("text-anchor", "middle")
             .style("font-size", "12px")
-            .text("Time");
+            .text("Tiempo");
 
         svg.append("text")
             .attr("transform", "rotate(-90)")
@@ -69,7 +70,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
         const line = d3.line()
             .x(d => x(new Date(d.x)))
             .y(d => y(d.y))
-            .curve(d3.curveMonotoneX);
+            .curve(d3.curveLinear);
 
         const tooltip = d3.select("body")
             .append("div")
@@ -135,7 +136,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
                     className="fullscreen-toggle"
                     onClick={() => setIsFullscreen(prev => !prev)}
                 >
-                    {isFullscreen ? "Close" : "Fullscreen"}
+                    {isFullscreen ? "Cerrar" : "Ampliar"}
                 </button>
             </div>
             <svg ref={svgRef}></svg>
