@@ -28,6 +28,9 @@ const RoomSelection = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
     
+    //CHECK FOR UNREGISTERED MODULES
+    
+
     useEffect(() => {
         setIsLoggedIn(document.cookie
           .split("; ")
@@ -87,13 +90,15 @@ const RoomSelection = () => {
         event.preventDefault();
 
         const payload = {
+            room_id: 1,
             x: recentMousePos.x.toString(),
             y: recentMousePos.y.toString(),
+            z: 0,
             sensors: sensors.filter(sensor => sensor.sensor_type && sensor.sensor_unit)
         };
 
         try {
-            const response = await fetch("/place-module", {
+            const response = await fetch("http://localhost:8000/place-module", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -104,6 +109,7 @@ const RoomSelection = () => {
             if (!response.ok) throw new Error("Failed to place module");
 
             alert("Module placed successfully!");
+            fetchLast();
             setShowPopup(false);
             setSensors([{ sensor_type: "", sensor_unit: "" }]); // Reset form
         } catch (error) {
