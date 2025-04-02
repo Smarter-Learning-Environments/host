@@ -3,6 +3,19 @@ import pandas as pd
 from . import broker, db, sql
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ValidationError
+from typing import List
+
+class SensorIn(BaseModel):
+    sensor_type: str
+    sensor_unit: str
+
+class ModuleIn(BaseModel):
+    room_id: int
+    x: int
+    y: int
+    z: int
+    sensors: List[SensorIn]
 
 origins = [
     "http://localhost",
@@ -30,6 +43,29 @@ def read_root():
     # TODO health/status endpoint for docker
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
+
+@app.post("/place-module")
+def place_module(module: ModuleIn, response: Response):
+    try:
+        #insert module
+        module_id = db.execute_sql(sql.INSERT_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z,))
+        
+        #insert sensors
+        for sensor in module.sensors:
+            db.execute_sql(sql.INSERT_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module_id,))
+
+        return {"success": "true", "module_id": module_id}
+    
+    except psycopg2.Error as e:
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+    except ValidationError as e:
+        response.status_code = 422
+        return {"error": type(e), "msg": str(e)}
+    except Exception as e:
+        response.status_code = 500
+        return {"error": "Unknown Error", "msg": str(e)}
+
 
 @app.post("/test-post")
 def test_post():
