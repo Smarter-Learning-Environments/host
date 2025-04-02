@@ -20,8 +20,9 @@ def on_message(client, userdata, msg: mqtt.MQTTMessage):
 
     split_topic = msg.topic.split('/')
     service = split_topic[0] # TODO reply based on service type
-    module_id = split_topic[1].split('_')[1] # TODO test/allow underscore in module name
-    sensor_id = split_topic[2].split('_')[1]
+    module_id = split_topic[1]
+    sensor_id = split_topic[2]
+
 
     # Payload contains:
     # TimestampUnix:Reading
