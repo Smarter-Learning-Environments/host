@@ -1,4 +1,4 @@
-# /status
+## /status
 
 **GET**
 Status of server and modules. Container health, connection information, last message, logs. 
@@ -16,7 +16,7 @@ Status of server and modules. Container health, connection information, last mes
 ```
 
 
-# /get-latest-reading/{room_id}
+## /get-latest-reading/{room_id}
 
 **GET**
 Asks for latest reading of a certain room    
@@ -212,4 +212,54 @@ gets most recent n datapoints from each sensor
 {
     "error" : "10 data points do not exist"
 }
+```
+
+## /get-unregistered-modules
+**GET**
+gets all modules from registration table that are not yet registered (module_id NULL)
+
+```json
+    [
+        {"hw_id": "A36",
+        "num_sensors": 4},
+        {"hw_id": "B92",
+        "num_sensors": 2},
+    ]
+```
+
+# /register-module
+**POST**
+takes in hardware ID of unregistered module and module-sensor info and assigns IDs. Updates Registration table to hold Module ID. Called by admin when initiating sensors
+
+```json
+{
+    "hw_id" : "W49",
+    "room_id" : 1,
+    "x" : 50,
+    "y" : 100,
+    "z" : 0,
+    "sensors" : 
+        [
+            {
+                "sensor_type" : "CO2",
+                "sensor_unit" : "ppm"
+            },
+            {
+                "sensor_type" : "temp",
+                "sensor_unit" : "celsius"
+            }
+        ]
+}
+
+200:
+
+{
+    "success" : "true",
+    "module_id": 1
+}
+
+
+400:
+
+{"error" : "Invalid number of sensors"}
 ```

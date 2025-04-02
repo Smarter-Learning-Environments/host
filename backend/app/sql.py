@@ -1,3 +1,11 @@
+UPDATE_UNREG_QUERY = """
+    UPDATE registration SET module_id = %s WHERE hw_id = %s
+"""
+
+GET_UNREG_QUERY = """
+    SELECT hw_id, num_sensors FROM registration WHERE module_id IS NULL;
+"""
+
 INSERT_MODULE_QUERY = """
     INSERT INTO modules (room_id, position_x, position_y, position_z)
     VALUES (%s, %s, %s, %s)
