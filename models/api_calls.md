@@ -227,7 +227,7 @@ gets all modules from registration table that are not yet registered (module_id 
     ]
 ```
 
-# /register-module
+## /register-module
 **POST**
 takes in hardware ID of unregistered module and module-sensor info and assigns IDs. Updates Registration table to hold Module ID. Called by admin when initiating sensors
 
@@ -252,7 +252,6 @@ takes in hardware ID of unregistered module and module-sensor info and assigns I
 }
 
 200:
-
 {
     "success" : "true",
     "module_id": 1
@@ -260,6 +259,24 @@ takes in hardware ID of unregistered module and module-sensor info and assigns I
 
 
 400:
-
 {"error" : "Invalid number of sensors"}
+```
+
+## /get-rooms
+**GET**
+gets info on all rooms in the db
+
+```json
+[
+    {
+        "room_id" : 1,
+        "room_name" : "E18",
+        "img_path" : "floorplan_0.png"
+    },
+    {
+        "room_id" : 2,
+        "room_name" : "E19",
+        "img_path" : "floorplan_1.png"
+    },
+]
 ```

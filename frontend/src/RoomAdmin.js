@@ -27,9 +27,10 @@ const RoomSelection = () => {
     });
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
+    const [roomNumber, setRoomNumber] = useState(1);
     
     //CHECK FOR UNREGISTERED MODULES
-    
+
 
     useEffect(() => {
         setIsLoggedIn(document.cookie
