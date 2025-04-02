@@ -8,10 +8,9 @@ body {
     font-family: Arial, sans-serif;
 }
 .container {
-    display: flex;
+    align-items: center;
+    margin: auto;
     width: 70%;
-    /* border: 20px solid #ddd; */
-    border-radius: 10px;
 }
 .popup {
     display: flex;
@@ -136,7 +135,7 @@ button[type="button"] {
     background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     width: 200px;
-    display: none;
+    /* display: none; */
 }
 
 .admin-login form {
@@ -167,14 +166,31 @@ button[type="button"] {
     background: #0056b3;
 }
 
-.error {
-    color: red;
-    font-size: 12px;
-    text-align: left;
-}
-
 .admin-login a {
     font-size: 12px;
+}
+
+.admin-logout {
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    width: 200px;
+}
+
+.admin-logout button {
+    width: 50%;
+    padding: 4px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.admin-logout button:hover {
+    background: #0056b3;
 }
 
 .graphs-container {
@@ -256,4 +272,21 @@ button[type="button"] {
 
 .main-container {
     padding: 40px;
+    padding-bottom: 80px;
+}
+
+.admin-container {
+    padding: 40px;
+}
+
+.timerangeinput {
+    display: flex;
+}
+
+.error-msg {
+    color: red;
+}
+
+.d3-tooltip {
+    z-index: 9999;
 }

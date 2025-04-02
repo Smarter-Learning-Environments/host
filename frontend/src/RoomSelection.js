@@ -8,8 +8,8 @@ const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
         co2: false,
         pm25: false,
-        temp: false,
-        humd: false,
+        temperatura: false,
+        humedad: false,
     });
     const [adminPass, setAdminPass] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -23,8 +23,8 @@ const RoomSelection = () => {
     });
     const [latestModules, setLatestModules] = useState([]);
     const [sensorData, setSensorData] = useState([]);
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
+    const [startTime, setStartTime] = useState(0);
+    const [endTime, setEndTime] = useState(0);
     const [isNoData, setIsNoData] = useState(false);
     const [firstDataFetch, setFirstDataFetch] = useState(true);
 
@@ -139,7 +139,7 @@ const RoomSelection = () => {
 
     const getTooltipContent = (module) => {
         return (
-            `<strong>Module ID:</strong> ${module.module_id}<br/>` +
+            `<strong>ID del Módulo:</strong> ${module.module_id}<br/>` +
             module.sensors.map(sensor => {
                 const latest = sensor.readings.at(-1); // Get the most recent reading
                 return `${sensor.sensor_type}: ${latest.value} ${sensor.sensor_units}`;
@@ -147,31 +147,24 @@ const RoomSelection = () => {
         );
     };
     
-    const handleCheckboxChange = (event) => {
-        const { id, checked } = event.target;
-        setSelectedFactors((prev) => ({
-            ...prev,
-            [id]: checked,
-        }));
-    };
-
     const handleLogin = async (event) => {
         event.preventDefault();
 
         navigate("/room-admin");
 
         try {
-            const response = await fetch("/admin-login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(adminPass),
-            });
+            // const response = await fetch("/admin-login", {
+            //     method: "POST",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify(adminPass),
+            // });
 
-            if (!response.ok) {
-                throw new Error("Contraseña Incorrecta");
-            }
+            // if (!response.ok) {
+            //     throw new Error("Contraseña Incorrecta");
+            // }
 
             // If login is successful, navigate to RoomAdmin.js
+            document.cookie = "admin_logged_in=true; path=/; max-age=3600";
             navigate("/room-admin");
         } catch (error) {
             setErrorMessage(error.message);
@@ -190,6 +183,7 @@ const RoomSelection = () => {
 
     return (
         <div className="main-container">
+
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
@@ -284,25 +278,25 @@ const RoomSelection = () => {
                         </tbody>
                     </table>
                 </div> */}
+                <div className="timerangeinput">
+                    <table><tbody>
+                        <tr>
+                            <td><label>Fecha de Inicio</label></td>
+                            <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
+                        </tr>
+                        <tr>
+                            <td><label>Fecha de Fin</label></td>
+                            <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
+                        </tr>
+                    </tbody></table>
+                    <button id="submittime" onClick={handleTimeSubmit}>Enviar</button>
+                </div>
             </div>
             
-            <div className="timerangeinput">
-                <table><tbody>
-                    <tr>
-                        <td><label>Start</label></td>
-                        <td><input id="start" type="datetime-local" name="Start" value={startTime} onChange={handleStartPick}/></td>
-                    </tr>
-                    <tr>
-                        <td><label>End</label></td>
-                        <td><input id="end" type="datetime-local" name="End" value={endTime} onChange={handleEndPick}/></td>
-                    </tr>
-                </tbody></table>
-                    <button id="submittime" onClick={handleTimeSubmit}>Submit</button>
-            </div>
 
             <div className="graphs-container">
                 {isNoData && (
-                    <label className="nodatalabel">No data found in selected Time Range!</label> )}
+                    <label className="error-msg">¡No se encontraron datos en el rango de tiempo seleccionado!</label> )}
                 {Object.entries(sensorData).map(([sensorType, sensors], idx) =>
                         <div className="graph-bg">
                             <SensorGraph
@@ -316,6 +310,7 @@ const RoomSelection = () => {
                         </div>
                 )}
             </div>
+            
             <div className="admin-login">
                 <a href="https://youtube.com" target="_blank">¡Toma nuestra encuesta!</a>
                 <form onSubmit={handleLogin}>
@@ -328,7 +323,7 @@ const RoomSelection = () => {
                         required
                     />
                     <button type="submit">Ingresar</button>
-                    {errorMessage && <p className="error">{errorMessage}</p>}
+                    {errorMessage && <p className="error-msg">{errorMessage}</p>}
                 </form>
             </div>
 
