@@ -60,6 +60,10 @@ def discover_module(module: DiscoverableModule, response: Response):
     # TODO check if already exists
     try:
         db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id, module.hw_id, module.sensor_count))
+    except psycopg2.errors.UniqueViolation as e:
+        # If a UniqueViolation error occurs (duplicate key), return HTTP 409 Conflict
+        response.status_code = 409  # Conflict
+        return {"error": "Resource already exists", "msg": str(e)}
     except psycopg2.Error as e:
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
