@@ -28,9 +28,12 @@ const RoomSelection = () => {
     const navigate = useNavigate();
     const [roomNumber, setRoomNumber] = useState(1);
     const [roomData, setRoomData] = useState([]);
-    
+    const [unregisteredModules, setUnregisteredModules] = useState([]);
+    const [selectedModule, setSelectedModule] = useState(null);
+
     //CHECK FOR UNREGISTERED MODULES
 
+    
 
     useEffect(() => {
         setIsLoggedIn(document.cookie
@@ -44,6 +47,7 @@ const RoomSelection = () => {
             try {
                 await fetchLast();
                 await fetchRoomData();
+                await fetchUnregisteredModules();
             } catch (err) {
                 console.error("Error during data fetch:", err);
             }
@@ -51,6 +55,16 @@ const RoomSelection = () => {
 
         fetchAll();
     }, [roomNumber]);
+
+    const fetchUnregisteredModules = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/get-unregistered-modules");
+            const data = await res.json();
+            setUnregisteredModules(data);
+        } catch (err) {
+            console.error("Failed to fetch unregistered modules:", err);
+        }
+    };
 
     const fetchRoomData = async () => {
         try {
@@ -73,6 +87,8 @@ const RoomSelection = () => {
     }, [roomNumber]);
 
     const handleFloorPlanClick = (event) => {
+        if(selectedModule === null) return;
+
         //set recent mousePos click
         setRecentMousePos({x: mousePos.x, y: mousePos.y});
         //open popup
@@ -115,7 +131,8 @@ const RoomSelection = () => {
         event.preventDefault();
 
         const payload = {
-            room_id: 1,
+            hw_id: selectedModule.hw_id,
+            room_id: roomNumber,
             x: recentMousePos.x.toString(),
             y: recentMousePos.y.toString(),
             z: 0,
@@ -123,7 +140,7 @@ const RoomSelection = () => {
         };
 
         try {
-            const response = await fetch("http://localhost:8000/place-module", {
+            const response = await fetch("http://localhost:8000/register-module", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -140,6 +157,7 @@ const RoomSelection = () => {
         } catch (error) {
             alert(error.message);
         }
+        await fetchUnregisteredModules();
     };
 
     const scalePosition = (x, y) => {
@@ -179,8 +197,40 @@ const RoomSelection = () => {
     const handleLogout = () => {
         document.cookie = "admin_logged_in=; path=/; max-age=0";
         navigate("/");
-      };
+    };
       
+    const handleRegister = async (formData) => {
+    try {
+        const res = await fetch("http://localhost:8000/register-module", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+        });
+
+        if (!res.ok) throw new Error("Failed to register module");
+        alert("Module registered successfully!");
+
+        // Refresh unregistered list
+        fetchUnregisteredModules();
+
+    } catch (err) {
+        console.error(err);
+        alert("Error registering module.");
+    }
+};
+
+const handleSelectModule = (module) => {
+    setSelectedModule(module);
+
+    // Auto-fill with empty sensor_type/unit fields
+    const prefilled = Array.from({ length: module.num_sensors }, () => ({
+        sensor_type: "",
+        sensor_unit: ""
+    }));
+    console.log(prefilled);
+    setSensors(prefilled);
+};
+    
     return (
         <div>
             {isLoggedIn && (
@@ -215,6 +265,18 @@ const RoomSelection = () => {
                             })}
                         </div>
                     </div>
+
+                    {unregisteredModules.length > 0 && (
+                        <div className={`placement-alert ${selectedModule ? "selected-module" : ""}`}>
+                            <h3>Unregistered Module Found</h3>
+                            <p>HW ID: {unregisteredModules[0].hw_id}</p>
+                            <p>Expected sensors: {unregisteredModules[0].num_sensors}</p>
+                            <button onClick={() => handleSelectModule(unregisteredModules[0])}>
+                            Place This Module
+                            </button>
+                        </div>
+                    )}
+
 
                     <div className="admin-logout">
                         <button onClick={handleLogout}>Logout</button>

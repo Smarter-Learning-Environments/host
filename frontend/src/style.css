@@ -297,3 +297,18 @@ button[type="button"] {
     left: 5px;
     padding: 10px;
 }
+
+.placement-alert {
+    border: 2px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .placement-alert.selected-module {
+    border-color: #28a745;
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.4);
+    background-color: #e6ffed;
+  }  
