@@ -11,20 +11,20 @@ INSERT INTO room (room_name) VALUES ('Test room');
 CREATE TABLE modules (
     -- position and model are not defined yet, but should be in the future
     module_id varchar PRIMARY KEY,
-    room_id int,
-    position_x int,
-    position_y int,
-    position_z int,
-    model varchar,
+    room_id int NULL,
+    position_x int NULL,
+    position_y int NULL,
+    position_z int NULL,
+    model varchar NULL,
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
 INSERT INTO modules (module_id, room_id, model, position_x, position_y, position_z) VALUES ('b1:a2:5f:08:6c:c1', 1, 'UNKNOWN_MODEL', 0, 0, 0);
 
 CREATE TABLE sensors (
-    sensor_id int PRIMARY KEY,
-    sensor_type varchar,
-    sensor_unit varchar,
+    sensor_id int NOT NULL,
+    sensor_type varchar NULL,
+    sensor_unit varchar NULL,
     module_id varchar NOT NULL,
     foreign key (module_id) references modules(module_id)
 );
@@ -39,8 +39,7 @@ CREATE TABLE records (
     record_value float NOT NULL,
     sensor_id int NOT NULL,
 
-    CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id),
-    CONSTRAINT fk_sensor FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id)
+    CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id)
 );
 
 CREATE INDEX idx_record_time ON records (record_time);
