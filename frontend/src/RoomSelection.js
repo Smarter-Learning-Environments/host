@@ -27,6 +27,8 @@ const RoomSelection = () => {
     const [endTime, setEndTime] = useState(0);
     const [isNoData, setIsNoData] = useState(false);
     const [firstDataFetch, setFirstDataFetch] = useState(true);
+    const [roomNumber, setRoomNumber] = useState(1);
+    const [rooms, setRooms] = useState([]);
 
     const navigate = useNavigate();
 
@@ -50,7 +52,7 @@ const RoomSelection = () => {
  
     const fetchLast = async () => {
         try {
-            const res = await fetch('http://localhost:8000/get-latest-reading/1');
+            const res = await fetch(`http://localhost:8000/get-latest-reading/${roomNumber}`);
             const data = await res.json();
             setLatestModules(data);
         } catch (err) {
@@ -187,31 +189,32 @@ const RoomSelection = () => {
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
-                    {Array.isArray(latestModules) && 
-                        latestModules.map((module, index) => {
-                            const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                        {latestModules.map((module, index) => {
+                            const { left, top } = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+
                             return (
                                 <div
-                                    key={index}
+                                    key={module.module_id}
                                     className="sensor-dot"
                                     style={{ left: `${left}px`, top: `${top}px` }}
                                     onMouseEnter={(e) => {
                                         setTooltip({
-                                            visible: true,
-                                            x: e.clientX,
-                                            y: e.clientY,
-                                            content: getTooltipContent(module)
+                                        visible: true,
+                                        x: e.clientX,
+                                        y: e.clientY,
+                                        content: getTooltipContent(module)
                                         });
                                     }}
                                     onMouseMove={(e) => {
-                                        setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                        setTooltip((prev) => ({ ...prev, x: e.clientX, y: e.clientY }));
                                     }}
                                     onMouseLeave={() => {
-                                        setTooltip(prev => ({ ...prev, visible: false}));
+                                        setTooltip((prev) => ({ ...prev, visible: false }));
                                     }}
                                 />
-                            )
-                    })}
+                            );
+                        })}
+
                 </div>
 
                 {/* <div className="checkbox-container">
@@ -346,6 +349,12 @@ const RoomSelection = () => {
                     dangerouslySetInnerHTML={{ __html: tooltip.content }}
                 />
             )}
+
+            <div className="room-selector">
+                <select>
+
+                </select>
+            </div>
 
         </div>
     );

@@ -47,3 +47,9 @@ CREATE INDEX idx_record_time ON records (record_time);
 CREATE INDEX idx_module_id ON modules (module_id);
 
 INSERT INTO records (module_id, record_time, record_value, sensor_id) VALUES ('b1:a2:5f:08:6c:c1', 1300, 18, 1);
+
+CREATE TABLE registration (
+    hw_id varchar(49) PRIMARY KEY,
+    num_sensors int NOT NULL,
+    module_id int
+);

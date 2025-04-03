@@ -30,3 +30,19 @@ def execute_sql(sql: str, args: tuple = None, column_names: bool = False, conn =
             if(column_names):
                 return([desc[0] for desc in curs.description], curs.fetchall())
 
+def execute_insert(sql: str, args: tuple = None, conn = conn, returning: bool = False):
+    """
+    Use an existing connection to open a cursor and execute the given SQL.
+    
+    :param sql: SQL to run. Use %s to denote an argument
+    :param args: Arguments to fill inside the SQL string
+    :param column_names: Return query results and column names extracted from cursor information. 
+    :param conn: Open postgres connection
+    """
+    val = None
+    with conn:
+        with conn.cursor() as curs:
+            curs.execute(sql, args if args else ())
+            if returning:
+                return curs.fetchone()[0]
+
