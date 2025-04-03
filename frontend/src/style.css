@@ -295,4 +295,5 @@ button[type="button"] {
     position: fixed;
     top: 5px;
     left: 5px;
+    padding: 10px;
 }
