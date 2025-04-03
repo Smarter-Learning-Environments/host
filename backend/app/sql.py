@@ -65,4 +65,4 @@ VALUES (%s, %s, %s, %s);
 DISCOVER_MODULE = """
 INSERT INTO modules (module_id) VALUES (%s);
 INSERT INTO sensors (module_id, sensor_id) SELECT i, %s FROM generate_series(0, %s) AS i;
-""" # params: Module ID, Module ID, # sensors
+""" # params: Module ID, # sensors, Module ID
