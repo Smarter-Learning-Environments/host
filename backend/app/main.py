@@ -1,10 +1,9 @@
 import psycopg2
 import pandas as pd
-from .utils import *
 from . import broker, db, sql
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ValidationError
+from .utils import *
 
 origins = [
     "http://localhost",
@@ -104,7 +103,7 @@ def place_module(module: UnregModuleIn, response: Response):
 def test_post():
     broker.publish.single("paho/test/topic", "message", hostname="mqtt-broker")
     return {"message": "Hello, World!"}
- 
+
 @app.get("/get-unregistered-modules")
 def get_unregistered_modules(response: Response):
     df = None
@@ -127,10 +126,32 @@ def get_unregistered_modules(response: Response):
 
     return res
 
+@app.get("/get-room-data")
+def get_room_data(response: Response):
+    df = None
+
+    try:
+        columns, results = db.execute_sql(sql.GET_ROOM_QUERY, column_names=True)
+        df = pd.DataFrame(results, columns=columns)
+    except psycopg2.Error as e:
+        # TODO more granular error codes
+        # TODO 404 room id not found
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+    
+    res = []
+    for room_id, room_df in df.groupby('room_id'):
+        res.append({
+            "room_id": int(room_df.iloc[0]['room_id']),
+            "room_name": str(room_df.iloc[0]['room_name']),
+            "img_path": room_df.iloc[0]['img_path']
+        })
+    return res
+
+
 @app.get("/get-latest-reading/{room_id}")
 def get_latest_reading(room_id: int, response: Response):
     df = None
-
 
     try:
         columns, results = db.execute_sql(sql.LATEST_READINGS_QUERY, args=(room_id,), column_names=True)
@@ -154,6 +175,10 @@ def get_latest_reading(room_id: int, response: Response):
             "sensors": []
         })
         for sensor_id, sensor_df in module_df.groupby('sensor_id'):
+            time = sensor_df.iloc[0]['record_time']
+            if pd.isna(time):
+                continue
+
             res[idx]["sensors"].append({
                 'sensor_id' : sensor_id,
                 'sensor_type' : sensor_df.iloc[0]['sensor_type'],
@@ -161,7 +186,7 @@ def get_latest_reading(room_id: int, response: Response):
                 'readings': [
                     {
                         'value': sensor_df.iloc[0]['record_value'],
-                        'time': int(sensor_df.iloc[0]['record_time'])
+                        'time': int(time)
                     }
                 ]
             })

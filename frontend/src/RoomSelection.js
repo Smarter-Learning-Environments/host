@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
-import floorplan from "./floorplan_0.png";
 import SensorGraph from "./SensorGraph";
 
 const RoomSelection = () => {
@@ -28,10 +27,10 @@ const RoomSelection = () => {
     const [isNoData, setIsNoData] = useState(false);
     const [firstDataFetch, setFirstDataFetch] = useState(true);
     const [roomNumber, setRoomNumber] = useState(1);
-    const [rooms, setRooms] = useState([]);
+    const [roomData, setRoomData] = useState([]);
+    const [floorPlanPath, setFloorPlanPath] = useState([]);
 
     const navigate = useNavigate();
-
 
     useLayoutEffect(() => {
         const handleResize = () => {
@@ -43,12 +42,28 @@ const RoomSelection = () => {
     }, []);
     
     useEffect(() => {
-        const fetchBoth = async () => {
-            await fetchLast();
-            setTimeout(() => fetchData(), 100);
+        const fetchAll = async () => {
+            try {
+                await fetchLast();
+                await fetchData();
+                await fetchRoomData();
+            } catch (err) {
+                console.error("Error during data fetch:", err);
+            }
+        };
+    
+        fetchAll();
+    }, [roomNumber]);
+
+    const fetchRoomData = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/get-room-data`);
+            const data = await res.json();
+            setRoomData(data);
+        } catch (err) {
+            console.error("Error fetching room data: ",err);
         }
-        fetchBoth();
-    }, []);
+    }
  
     const fetchLast = async () => {
         try {
@@ -117,13 +132,19 @@ const RoomSelection = () => {
     };
 
     useEffect(() => {
+        console.log("selectedRoom:", roomNumber);
+        console.log(`images/floorplan_${roomNumber}.png`)
+    }, [roomNumber]);
+
+    useEffect(() => {
+        if (!roomNumber) return;
+
         const img = new Image();
-        img.src = floorplan;
+        img.src = `/images/floorplan_${roomNumber}.png`;
         img.onload = () => {
-          originalSize.current = { width: img.width, height: img.height };
+            originalSize.current = { width: img.width, height: img.height };
         };
-      }, []);
-      
+    }, [roomNumber]);
 
     const scalePosition = (x, y) => {
         if (!imageRef.current || !originalSize.current) return { left: 0, top: 0 };
@@ -188,7 +209,7 @@ const RoomSelection = () => {
 
             <div className="container">
                 <div className="image-container">
-                    <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
+                    <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
                         {latestModules.map((module, index) => {
                             const { left, top } = scalePosition(module.module_xyz[0], module.module_xyz[1]);
 
@@ -351,8 +372,13 @@ const RoomSelection = () => {
             )}
 
             <div className="room-selector">
-                <select>
-
+                <label>Room</label>
+                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
+                    {roomData.map((room, index) => {
+                        return (
+                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
+                        )
+                    })}
                 </select>
             </div>
 

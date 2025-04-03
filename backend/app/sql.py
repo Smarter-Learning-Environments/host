@@ -1,3 +1,7 @@
+GET_ROOM_QUERY = """
+    SELECT * FROM room
+"""
+
 UPDATE_UNREG_QUERY = """
     UPDATE registration SET module_id = %s WHERE hw_id = %s
 """

@@ -290,3 +290,9 @@ button[type="button"] {
 .d3-tooltip {
     z-index: 9999;
 }
+
+.room-selector {
+    position: fixed;
+    top: 5px;
+    left: 5px;
+}
