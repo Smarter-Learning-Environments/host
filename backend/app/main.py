@@ -1,29 +1,10 @@
 import psycopg2
 import pandas as pd
+from .utils import *
 from . import broker, db, sql
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
-from typing import List
-
-class SensorIn(BaseModel):
-    sensor_type: str
-    sensor_unit: str
-
-class ModuleIn(BaseModel):
-    room_id: int
-    x: int
-    y: int
-    z: int
-    sensors: List[SensorIn]
-
-class UnregModuleIn(BaseModel):
-    hw_id: str
-    room_id: int
-    x: int
-    y: int
-    z: int
-    sensors: List[SensorIn]
 
 origins = [
     "http://localhost",
@@ -73,6 +54,25 @@ def place_module(module: ModuleIn, response: Response):
     except Exception as e:
         response.status_code = 500
         return {"error": "Unknown Error", "msg": str(e)}
+
+@app.post("/discover-module")
+def discover_module(module: DiscoverableModule, response: Response):
+    # TODO use decorator or FastAPI default exception handler
+    # TODO check if already exists
+    try:
+        db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id, module.hw_id, module.sensor_count))
+    except psycopg2.Error as e:
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+    except ValidationError as e:
+        response.status_code = 422
+        return {"error": type(e), "msg": str(e)}
+    except Exception as e:
+        response.status_code = 500
+        return {"error": "Unknown Error", "msg": str(e)}
+    
+    return {"status": "OK"}
+
 
 @app.post("/register-module")
 def place_module(module: UnregModuleIn, response: Response):

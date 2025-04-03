@@ -22,7 +22,7 @@ CREATE TABLE modules (
 INSERT INTO modules (module_id, room_id, model, position_x, position_y, position_z) VALUES ('b1:a2:5f:08:6c:c1', 1, 'UNKNOWN_MODEL', 0, 0, 0);
 
 CREATE TABLE sensors (
-    sensor_id int NOT NULL PRIMARY KEY,
+    sensor_id int PRIMARY KEY,
     sensor_type varchar,
     sensor_unit varchar,
     module_id varchar NOT NULL,

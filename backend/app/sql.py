@@ -61,3 +61,8 @@ SAVE_SENSOR_READING = """
 INSERT INTO records (module_id, record_time, record_value, sensor_id)
 VALUES (%s, %s, %s, %s);
 """ # params: Module ID, record time, record value, sensor ID
+
+DISCOVER_MODULE = """
+INSERT INTO modules (module_id) VALUES (%s);
+INSERT INTO sensors (module_id, sensor_id) SELECT i, %s FROM generate_series(0, %s) AS i;
+""" # params: Module ID, Module ID, # sensors

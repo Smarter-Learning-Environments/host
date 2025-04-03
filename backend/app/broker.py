@@ -10,7 +10,6 @@ def on_connect(client, userdata, flags, reason_code, properties):
     # reconnect then subscriptions will be renewed.
     # client.subscribe("$SYS/#")
     client.subscribe("sensor_service/#")
-    client.subscribe("hw_reg_service/request/#")
     
 
 def on_message(client, userdata, msg: mqtt.MQTTMessage):
@@ -25,7 +24,7 @@ def on_message(client, userdata, msg: mqtt.MQTTMessage):
     service = split_topic[0] # TODO reply based on service type
     if(service != "sensor_service"): return
     module_id = split_topic[1]
-    sensor_id = split_topic[2]
+    sensor_id = int(split_topic[2])
 
 
     # Payload contains:
