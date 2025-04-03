@@ -1,8 +1,9 @@
 import psycopg2
 import pandas as pd
-from . import broker, db, sql, utils
+from . import broker, db, sql
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from .utils import *
 
 origins = [
     "http://localhost",
@@ -32,7 +33,7 @@ def read_root():
     return {"message": "Hello, World!"}
 
 @app.post("/place-module")
-def place_module(module: utils.ModuleIn, response: Response):
+def place_module(module: ModuleIn, response: Response):
     try:
         #insert module
         module_id = db.execute_insert(sql.INSERT_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z,), returning=True)
@@ -46,15 +47,34 @@ def place_module(module: utils.ModuleIn, response: Response):
     except psycopg2.Error as e:
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
-    except utils.ValidationError as e:
+    except ValidationError as e:
         response.status_code = 422
         return {"error": type(e), "msg": str(e)}
     except Exception as e:
         response.status_code = 500
         return {"error": "Unknown Error", "msg": str(e)}
 
+@app.post("/discover-module")
+def discover_module(module: DiscoverableModule, response: Response):
+    # TODO use decorator or FastAPI default exception handler
+    # TODO check if already exists
+    try:
+        db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id, module.hw_id, module.sensor_count))
+    except psycopg2.Error as e:
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+    except ValidationError as e:
+        response.status_code = 422
+        return {"error": type(e), "msg": str(e)}
+    except Exception as e:
+        response.status_code = 500
+        return {"error": "Unknown Error", "msg": str(e)}
+    
+    return {"status": "OK"}
+
+
 @app.post("/register-module")
-def place_module(module: utils.UnregModuleIn, response: Response):
+def place_module(module: UnregModuleIn, response: Response):
     try:
         #insert module
         module_id = db.execute_insert(sql.INSERT_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z,), returning=True)
@@ -71,7 +91,7 @@ def place_module(module: utils.UnregModuleIn, response: Response):
     except psycopg2.Error as e:
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
-    except utils.ValidationError as e:
+    except ValidationError as e:
         response.status_code = 422
         return {"error": type(e), "msg": str(e)}
     except Exception as e:

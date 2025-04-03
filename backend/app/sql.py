@@ -38,7 +38,7 @@ LEFT JOIN sensors s ON m.module_id = s.module_id
 LEFT JOIN LATERAL (
     SELECT r.record_time, r.record_value
     FROM records r
-    WHERE r.sensor_id = s.sensor_id
+    WHERE r.sensor_id = s.sensor_id AND r.module_id = m.module_id
     ORDER BY r.record_time DESC
     LIMIT 1
 ) r ON true
@@ -58,10 +58,15 @@ FROM records
 INNER JOIN modules ON records.module_id = modules.module_id
 INNER JOIN sensors ON records.sensor_id = sensors.sensor_id
 WHERE records.record_time >= %s AND records.record_time <= %s
-ORDER BY sensors.sensor_id, records.record_time DESC;
+ORDER BY modules.module_id, sensors.sensor_id, records.record_time DESC;
 """ # params: Minimum record time, maximum record time
 
 SAVE_SENSOR_READING = """
 INSERT INTO records (module_id, record_time, record_value, sensor_id)
 VALUES (%s, %s, %s, %s);
 """ # params: Module ID, record time, record value, sensor ID
+
+DISCOVER_MODULE = """
+INSERT INTO modules (module_id) VALUES (%s);
+INSERT INTO sensors (module_id, sensor_id) SELECT i, %s FROM generate_series(0, %s) AS i;
+""" # params: Module ID, Module ID, # sensors
