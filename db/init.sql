@@ -3,10 +3,11 @@ CREATE TABLE room (
     room_name varchar,
     x_max int,
     y_max int,
-    z_max int
+    z_max int,
+    img_path varchar
 );
 
-INSERT INTO room (room_name) VALUES ('Test room');
+INSERT INTO room (room_name, img_path) VALUES ('E18', 'floorplan_0.png');
 
 CREATE TABLE modules (
     -- position and model are not defined yet, but should be in the future

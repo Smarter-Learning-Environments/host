@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css"; 
-import floorplan from "./floorplan_0.png";
+import floorplan from "./floorplan_1.png";
 import { useNavigate } from "react-router-dom";
 
 const RoomSelection = () => {

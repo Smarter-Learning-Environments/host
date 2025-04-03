@@ -262,21 +262,14 @@ takes in hardware ID of unregistered module and module-sensor info and assigns I
 {"error" : "Invalid number of sensors"}
 ```
 
-## /get-rooms
+## /get-room-data/{room_id}
 **GET**
-gets info on all rooms in the db
+gets info on specific room in the db
 
 ```json
-[
-    {
-        "room_id" : 1,
-        "room_name" : "E18",
-        "img_path" : "floorplan_0.png"
-    },
-    {
-        "room_id" : 2,
-        "room_name" : "E19",
-        "img_path" : "floorplan_1.png"
-    },
-]
+{
+    "room_id" : 1,
+    "room_name" : "E18",
+    "img_path" : "floorplan_0.png"
+}
 ```
