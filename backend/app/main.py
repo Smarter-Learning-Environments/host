@@ -59,7 +59,7 @@ def discover_module(module: DiscoverableModule, response: Response):
     # TODO use decorator or FastAPI default exception handler
     # TODO check if already exists
     try:
-        db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id, module.sensor_count, module.hw_id))
+        db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id, module.hw_id, module.sensor_count))
     except psycopg2.Error as e:
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
