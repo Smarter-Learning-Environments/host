@@ -28,7 +28,6 @@ const RoomSelection = () => {
     const [firstDataFetch, setFirstDataFetch] = useState(true);
     const [roomNumber, setRoomNumber] = useState(1);
     const [roomData, setRoomData] = useState([]);
-    const [floorPlanPath, setFloorPlanPath] = useState([]);
 
     const navigate = useNavigate();
 

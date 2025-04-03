@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css"; 
-import floorplan from "./floorplan_1.png";
 import { useNavigate } from "react-router-dom";
 
 const RoomSelection = () => {
@@ -28,6 +27,7 @@ const RoomSelection = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
     const [roomNumber, setRoomNumber] = useState(1);
+    const [roomData, setRoomData] = useState([]);
     
     //CHECK FOR UNREGISTERED MODULES
 
@@ -40,13 +40,37 @@ const RoomSelection = () => {
       }, [navigate]);
 
     useEffect(() => {
-        // Set the original image dimensions when it loads
+        const fetchAll = async () => {
+            try {
+                await fetchLast();
+                await fetchRoomData();
+            } catch (err) {
+                console.error("Error during data fetch:", err);
+            }
+        };
+
+        fetchAll();
+    }, [roomNumber]);
+
+    const fetchRoomData = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/get-room-data`);
+            const data = await res.json();
+            setRoomData(data);
+        } catch (err) {
+            console.error("Error fetching room data: ",err);
+        }
+    }
+
+    useEffect(() => {
+        if (!roomNumber) return;
+
         const img = new Image();
-        img.src = floorplan;
+        img.src = `/images/floorplan_${roomNumber}.png`;
         img.onload = () => {
             originalSize.current = { width: img.width, height: img.height };
         };
-    }, []);
+    }, [roomNumber]);
 
     const handleFloorPlanClick = (event) => {
         //set recent mousePos click
@@ -132,13 +156,9 @@ const RoomSelection = () => {
         };
     };
 
-    useEffect(() => {
-        fetchLast();
-    }, []);
-
     const fetchLast = async () => {
         try {
-            const res = await fetch('http://localhost:8000/get-latest-reading/1');
+            const res = await fetch(`http://localhost:8000/get-latest-reading/${roomNumber}`);
             const data = await res.json();
             setLatestModules(data);
         } catch (err) {
@@ -167,7 +187,7 @@ const RoomSelection = () => {
                 <div>
                     <div className="admin-container">
                         <div className="image-container" onMouseMove={handleMouseMove} onClick={handleFloorPlanClick}>
-                            <img ref={imageRef} src={floorplan} alt="Floor Plan of the classroom" />
+                            <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
                             {!showPopup && Array.isArray(latestModules) && 
                                 latestModules.map((module, index) => {
                                     const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
@@ -194,10 +214,6 @@ const RoomSelection = () => {
                                     )
                             })}
                         </div>
-                    </div>
-
-                    <div className="mouse-coordinates">
-                    X: {mousePos.x}px, Y: {mousePos.y}px
                     </div>
 
                     <div className="admin-logout">
@@ -264,6 +280,18 @@ const RoomSelection = () => {
                     Error! Not authenticated as admin
                 </label>
             )}
+
+            <div className="room-selector">
+                <label>Room</label>
+                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
+                    {roomData.map((room, index) => {
+                        return (
+                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
+                        )
+                    })}
+                </select>
+            </div>
+
         </div>
     );
 };
