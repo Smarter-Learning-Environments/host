@@ -198,12 +198,12 @@ def get_latest_reading(room_id: int, response: Response):
 
     return res
 
-@app.get('/get-data-timerange/{time_start}/{time_end}')
-def get_data_timerange(time_start: int, time_end: int, response: Response):
+@app.get('/get-data-timerange/{room_id}/{time_start}/{time_end}')
+def get_data_timerange(room_id: int, time_start: int, time_end: int, response: Response):
     df = None
 
     try:
-        columns, results = db.execute_sql(sql.READINGS_TIMERANGE_QUERY, args=(time_start, time_end), column_names=True)
+        columns, results = db.execute_sql(sql.READINGS_TIMERANGE_QUERY, args=(room_id, time_start, time_end), column_names=True)
         df = pd.DataFrame(results, columns=columns)
     except psycopg2.Error as e:
         # TODO more granular error codes

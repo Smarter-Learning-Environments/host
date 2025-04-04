@@ -57,7 +57,7 @@ SELECT
 FROM records
 INNER JOIN modules ON records.module_id = modules.module_id
 INNER JOIN sensors ON records.sensor_id = sensors.sensor_id
-WHERE records.record_time >= %s AND records.record_time <= %s
+WHERE modules.room_id = %s AND records.record_time >= %s AND records.record_time <= %s
 ORDER BY modules.module_id, sensors.sensor_id, records.record_time DESC;
 """ # params: Minimum record time, maximum record time
 

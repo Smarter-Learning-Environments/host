@@ -80,7 +80,7 @@ const RoomSelection = () => {
             const startMS = Math.floor(new Date(startTime).getTime()/1000);
             const endMS = Math.floor(new Date(endTime).getTime()/1000);
             console.log(`Start: ${startMS}, end: ${endMS}`);
-            const res = await fetch(`http://localhost:8000/get-data-timerange/${startMS}/${endMS}`);
+            const res = await fetch(`http://localhost:8000/get-data-timerange/${roomNumber}/${startMS}/${endMS}`);
             const data = await res.json();
 
             setIsNoData(!firstDataFetch && Object.keys(data).length === 0);
