@@ -19,12 +19,9 @@ body {
 .image-container {
     flex: 1;
     display: flex;
-    /* display: inline-block; */
     justify-content: center;
     align-items: center;
     position: relative;
-    /* min-width: 400px;
-    min-height: 450px; */
 }
 
 .image-container img {
@@ -132,7 +129,6 @@ button[type="button"] {
     position: fixed;
     bottom: 5px;
     left: 5px;
-    background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     width: 200px;
     /* display: none; */
@@ -247,7 +243,7 @@ button[type="button"] {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
-    max-width: calc(100vw - 40px); /* ✅ ensures it doesn't exceed screen width */
+    max-width: calc(100vw - 40px);
     box-sizing: border-box;
   }
   
@@ -296,6 +292,8 @@ button[type="button"] {
     top: 5px;
     left: 5px;
     padding: 10px;
+    display: flex;
+    gap: 4px;
 }
 
 .placement-alert {

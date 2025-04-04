@@ -21,7 +21,6 @@ const SensorGraph = ({ title, sensorSeries }) => {
         return () => observer.disconnect();
     }, []);
 
-    // D3 rendering code (same as before)
     useEffect(() => {
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
@@ -36,15 +35,20 @@ const SensorGraph = ({ title, sensorSeries }) => {
         x.domain(d3.extent(allPoints, d => new Date(d.x)));
         y.domain([0, d3.max(allPoints, d => d.y)*1.1]);
 
-        const xAxis = d3.axisBottom(x).ticks(5);
-        const yTicks = Math.max(2, Math.floor(height/50));
+        const xTicks = Math.max(2, Math.floor(width/150));
+        const xAxis = d3.axisBottom(x)
+            .ticks(xTicks)
+            .tickFormat(d3.timeFormat("%d/%m/%y %H:%M"));
+        const yTicks = Math.max(2, Math.floor(height/25));
         const yAxis = d3.axisLeft(y).ticks(yTicks);
 
         svg.attr("width", width).attr("height", height);
 
         svg.append("g")
+            .attr("class", "x-axis")
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(xAxis);
+
 
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
@@ -91,6 +95,8 @@ const SensorGraph = ({ title, sensorSeries }) => {
                 .attr("stroke", d3.schemeCategory10[series.colorIndex % 10])
                 .attr("stroke-width", 2)
                 .attr("d", line);
+
+
 
             svg.selectAll(`.circle-${i}`)
                 .data(series.data)

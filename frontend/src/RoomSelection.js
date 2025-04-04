@@ -70,7 +70,7 @@ const RoomSelection = () => {
             const data = await res.json();
             setLatestModules(data);
         } catch (err) {
-            console.error("Error fetching lateest: ", err);
+            console.error("Error fetching latest: ", err);
         }
     };
 
@@ -78,7 +78,12 @@ const RoomSelection = () => {
 
         try {
             const startMS = Math.floor(new Date(startTime).getTime()/1000);
-            const endMS = Math.floor(new Date(endTime).getTime()/1000);
+            var endMS = Math.floor(new Date(endTime).getTime()/1000);
+
+            if(endMS === 0) {
+                endMS = Math.floor(Date.now()/1000);
+            }
+            
             console.log(`Start: ${startMS}, end: ${endMS}`);
             const res = await fetch(`http://localhost:8000/get-data-timerange/${roomNumber}/${startMS}/${endMS}`);
             const data = await res.json();
@@ -115,6 +120,7 @@ const RoomSelection = () => {
                     if (!grouped[sensor_type][sensor_id]) {
                         grouped[sensor_type][sensor_id] = {
                             label: `Sensor ${sensor_id}`,
+                            units: sensor_units,
                             data: [],
                         };
                     }
@@ -237,70 +243,6 @@ const RoomSelection = () => {
 
                 </div>
 
-                {/* <div className="checkbox-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th><b>Niveles Recomendados</b></th>
-                                <th><b>Factores Ambientales</b></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><label>0 - 1000ppm</label></td>
-                                <td>
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            id="co2" 
-                                            checked={selectedFactors.co2}
-                                            onChange={handleCheckboxChange}
-                                        /> CO2
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><label>0 - 5 μg/m³</label></td>
-                                <td>
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            id="pm25" 
-                                            checked={selectedFactors.pm25}
-                                            onChange={handleCheckboxChange} 
-                                        /> PM2.5
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><label>15 - 27°C</label></td>
-                                <td>
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            id="temp" 
-                                            checked={selectedFactors.temp}
-                                            onChange={handleCheckboxChange} 
-                                        /> Temperatura
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><label>30% - 60%</label></td>
-                                <td>
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            id="humd" 
-                                            checked={selectedFactors.humd}
-                                            onChange={handleCheckboxChange} 
-                                        /> Humedad
-                                    </label>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div> */}
                 <div className="timerangeinput">
                     <table><tbody>
                         <tr>
@@ -371,7 +313,7 @@ const RoomSelection = () => {
             )}
 
             <div className="room-selector">
-                <label>Room</label>
+                <label>Cuarto</label>
                 <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
                     {roomData.map((room, index) => {
                         return (
