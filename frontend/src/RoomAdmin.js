@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css"; 
 import { useNavigate } from "react-router-dom";
+import RoomSelector from "./subcomponents/RoomSelector";
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -96,10 +97,15 @@ const RoomSelection = () => {
     };
 
     const handleInputChange = (index, field, value) => {
-        const updatedSensors = [...sensors];
-        updatedSensors[index][field] = value;
-        setSensors(updatedSensors);
-    };
+        setSensors(prevSensors => {
+          const updated = [...prevSensors];
+          updated[index] = {
+            ...updated[index],
+            [field]: value // only update 'sensor_type' or 'sensor_unit'
+          };
+          return updated;
+        });
+      };      
 
     const addSensor = () => {
         setSensors([...sensors, { sensor_type: "", sensor_unit: "" }]);
@@ -136,7 +142,11 @@ const RoomSelection = () => {
             x: recentMousePos.x.toString(),
             y: recentMousePos.y.toString(),
             z: 0,
-            sensors: sensors.filter(sensor => sensor.sensor_type && sensor.sensor_unit)
+            sensors: sensors.map(s => ({
+                original_type: s.original_type,
+                sensor_type: s.sensor_type,
+                sensor_unit: s.sensor_unit
+              }))
         };
 
         try {
@@ -226,6 +236,7 @@ const handleSelectModule = (module) => {
     const prefilled = [];
     for(const sensor of module.sensors) {
         prefilled.push({
+            "original_type": sensor.sensor_type,
             "sensor_type": sensor.sensor_type, 
             "sensor_unit": sensor.sensor_unit
         });
@@ -313,16 +324,7 @@ const handleSelectModule = (module) => {
                             </div>
                     )}
 
-                    <div className="room-selector">
-                        <label>Room</label>
-                        <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
-                            {roomData.map((room, index) => {
-                                return (
-                                    <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
-                                )
-                            })}
-                        </select>
-                    </div>
+                    <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
 
                     {tooltip.visible && !showPopup && (
                         <div

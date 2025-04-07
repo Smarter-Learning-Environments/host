@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import SensorGraph from "./SensorGraph";
+import RoomSelector from "./subcomponents/RoomSelector";
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -291,16 +292,8 @@ const RoomSelection = () => {
                 </form>
             </div>
 
-            <div className="room-selector">
-                <label>Cuarto</label>
-                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
-                    {roomData.map((room, index) => {
-                        return (
-                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
-                        )
-                    })}
-                </select>
-            </div>
+            <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
+
 
             {tooltip.visible && (
                 <div

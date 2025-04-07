@@ -32,28 +32,6 @@ def read_root():
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
 
-@app.post("/place-module")
-def place_module(module: ModuleIn, response: Response):
-    try:
-        #insert module
-        module_id = db.execute_insert(sql.INSERT_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z,), returning=True)
-        
-        #insert sensors
-        for sensor in module.sensors:
-            db.execute_insert(sql.INSERT_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module_id,))
-
-        return {"success": "true", "module_id": module_id}
-    
-    except psycopg2.Error as e:
-        response.status_code = 500
-        return {"error": type(e), "msg": e.pgerror}
-    except ValidationError as e:
-        response.status_code = 422
-        return {"error": type(e), "msg": str(e)}
-    except Exception as e:
-        response.status_code = 500
-        return {"error": "Unknown Error", "msg": str(e)}
-
 @app.post("/discover-module")
 def discover_module(module: DiscoverableModule, response: Response):
     # TODO use decorator or FastAPI default exception handler
@@ -85,7 +63,7 @@ def register_module(module: UnregModuleIn, response: Response):
         
         #update sensors
         for sensor in module.sensors:
-            db.execute_sql(sql.UPDATE_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module.hw_id, sensor.sensor_type,))
+            db.execute_sql(sql.UPDATE_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module.hw_id, sensor.original_type,))
 
         return {"success": "true"}
     
