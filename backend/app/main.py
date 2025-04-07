@@ -78,19 +78,16 @@ def discover_module(module: DiscoverableModule, response: Response):
 
 
 @app.post("/register-module")
-def place_module(module: UnregModuleIn, response: Response):
+def register_module(module: UnregModuleIn, response: Response):
     try:
-        #insert module
-        module_id = db.execute_insert(sql.INSERT_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z,), returning=True)
+        #update module
+        db.execute_sql(sql.UPDATE_MODULE_QUERY, args=(module.room_id, module.x, module.y, module.z, module.hw_id,))
         
-        #insert sensors
+        #update sensors
         for sensor in module.sensors:
-            db.execute_insert(sql.INSERT_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module_id,))
+            db.execute_sql(sql.UPDATE_SENSOR_QUERY, args=(sensor.sensor_type, sensor.sensor_unit, module.hw_id, sensor.sensor_type,))
 
-        #insert assigned module ID into registration table
-        db.execute_sql(sql.UPDATE_UNREG_QUERY, args=(module_id, module.hw_id,))
-
-        return {"success": "true", "module_id": module_id}
+        return {"success": "true"}
     
     except psycopg2.Error as e:
         response.status_code = 500
@@ -108,8 +105,8 @@ def test_post():
     broker.publish.single("paho/test/topic", "message", hostname="mqtt-broker")
     return {"message": "Hello, World!"}
 
-@app.get("/get-unregistered-modules")
-def get_unregistered_modules(response: Response):
+@app.get("/get-unregistered-module")
+def get_unregistered_module(response: Response):
     df = None
 
     try:
@@ -121,11 +118,31 @@ def get_unregistered_modules(response: Response):
         response.status_code = 500
         return {"error": type(e), "msg": e.pgerror}
 
-    res = []
-    for hw_id, hw_df in df.groupby('hw_id'):
-        res.append({
-            "hw_id": hw_id,
-            "num_sensors": int(hw_df.iloc[0]['num_sensors']),
+    if df.empty:
+        return {}
+
+    res = {
+        "hw_id": df.iloc[0]['module_id'],
+        "sensors": []
+    }
+    
+    try:
+        columns, results = db.execute_sql(sql.GET_SENSORS_FROM_ID_QUERY, args=(df.iloc[0]['module_id'],), column_names=True)
+        sdf = pd.DataFrame(results, columns=columns)
+    except psycopg2.Error as e:
+        # TODO more granular error codes
+        # TODO 404 room id not found
+        response.status_code = 500
+        return {"error": type(e), "msg": e.pgerror}
+    
+    if sdf.empty:
+        return res
+    
+    for sensor_id, sensor_df in sdf.groupby('sensor_id'):
+        res["sensors"].append({
+            "sensor_id": int(sensor_df.iloc[0]['sensor_id']),
+            "sensor_type": sensor_df.iloc[0]['sensor_type'],
+            "sensor_unit": sensor_df.iloc[0]['sensor_unit']
         })
 
     return res

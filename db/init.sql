@@ -73,5 +73,5 @@ INSERT INTO records (module_id, record_time, record_value, sensor_id) VALUES
 CREATE TABLE registration (
     hw_id varchar(49) PRIMARY KEY,
     num_sensors int NOT NULL,
-    module_id int
+    is_registered boolean
 );

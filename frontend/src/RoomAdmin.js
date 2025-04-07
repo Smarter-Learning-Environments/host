@@ -28,7 +28,7 @@ const RoomSelection = () => {
     const navigate = useNavigate();
     const [roomNumber, setRoomNumber] = useState(1);
     const [roomData, setRoomData] = useState([]);
-    const [unregisteredModules, setUnregisteredModules] = useState([]);
+    const [unregisteredModule, setUnregisteredModule] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
 
     //CHECK FOR UNREGISTERED MODULES
@@ -47,7 +47,7 @@ const RoomSelection = () => {
             try {
                 await fetchLast();
                 await fetchRoomData();
-                await fetchUnregisteredModules();
+                await fetchUnregisteredModule();
             } catch (err) {
                 console.error("Error during data fetch:", err);
             }
@@ -56,11 +56,11 @@ const RoomSelection = () => {
         fetchAll();
     }, [roomNumber]);
 
-    const fetchUnregisteredModules = async () => {
+    const fetchUnregisteredModule = async () => {
         try {
-            const res = await fetch("http://localhost:8000/get-unregistered-modules");
+            const res = await fetch("http://localhost:8000/get-unregistered-module");
             const data = await res.json();
-            setUnregisteredModules(data);
+            setUnregisteredModule(data);
         } catch (err) {
             console.error("Failed to fetch unregistered modules:", err);
         }
@@ -157,7 +157,7 @@ const RoomSelection = () => {
         } catch (error) {
             alert(error.message);
         }
-        await fetchUnregisteredModules();
+        await fetchUnregisteredModule();
     };
 
     const scalePosition = (x, y) => {
@@ -211,7 +211,7 @@ const RoomSelection = () => {
         alert("Module registered successfully!");
 
         // Refresh unregistered list
-        fetchUnregisteredModules();
+        fetchUnregisteredModule();
 
     } catch (err) {
         console.error(err);
@@ -223,60 +223,58 @@ const handleSelectModule = (module) => {
     setSelectedModule(module);
 
     // Auto-fill with empty sensor_type/unit fields
-    const prefilled = Array.from({ length: module.num_sensors }, () => ({
-        sensor_type: "",
-        sensor_unit: ""
-    }));
-    console.log(prefilled);
+    const prefilled = [];
+    for(const sensor of module.sensors) {
+        prefilled.push({
+            "sensor_type": sensor.sensor_type, 
+            "sensor_unit": sensor.sensor_unit
+        });
+    }
     setSensors(prefilled);
 };
     
     return (
         <div>
             {isLoggedIn && (
-                <div>
-                    <div className="admin-container">
-                        <div className="image-container" onMouseMove={handleMouseMove} onClick={handleFloorPlanClick}>
-                            <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
-                            {!showPopup && Array.isArray(latestModules) && 
-                                latestModules.map((module, index) => {
-                                    const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
-                                    return (
-                                        <div
-                                            key={index}
-                                            className="sensor-dot"
-                                            style={{ left: `${left}px`, top: `${top}px` }}
-                                            onMouseEnter={(e) => {
-                                                setTooltip({
-                                                    visible: true,
-                                                    x: e.clientX,
-                                                    y: e.clientY,
-                                                    content: getTooltipContent(module)
-                                                });
-                                            }}
-                                            onMouseMove={(e) => {
-                                                setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
-                                            }}
-                                            onMouseLeave={() => {
-                                                setTooltip(prev => ({ ...prev, visible: false}));
-                                            }}
-                                        />
-                                    )
-                            })}
-                        </div>
+                <div className="admin-container">
+                    <div className="image-container" onMouseMove={handleMouseMove} onClick={handleFloorPlanClick}>
+                        <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
+                        {!showPopup && Array.isArray(latestModules) && 
+                            latestModules.map((module, index) => {
+                                const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                                return (
+                                    <div
+                                        key={index}
+                                        className="sensor-dot"
+                                        style={{ left: `${left}px`, top: `${top}px` }}
+                                        onMouseEnter={(e) => {
+                                            setTooltip({
+                                                visible: true,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                content: getTooltipContent(module)
+                                            });
+                                        }}
+                                        onMouseMove={(e) => {
+                                            setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                        }}
+                                        onMouseLeave={() => {
+                                            setTooltip(prev => ({ ...prev, visible: false}));
+                                        }}
+                                    />
+                                )
+                        })}
                     </div>
 
-                    {unregisteredModules.length > 0 && (
+                    {Object.keys(unregisteredModule).length > 0 && (
                         <div className={`placement-alert ${selectedModule ? "selected-module" : ""}`}>
                             <h3>Unregistered Module Found</h3>
-                            <p>HW ID: {unregisteredModules[0].hw_id}</p>
-                            <p>Expected sensors: {unregisteredModules[0].num_sensors}</p>
-                            <button onClick={() => handleSelectModule(unregisteredModules[0])}>
+                            <p>HW ID: {unregisteredModule.hw_id}</p>
+                            <button onClick={() => handleSelectModule(unregisteredModule)}>
                             Place This Module
                             </button>
                         </div>
                     )}
-
 
                     <div className="admin-logout">
                         <button onClick={handleLogout}>Logout</button>
@@ -315,6 +313,17 @@ const handleSelectModule = (module) => {
                             </div>
                     )}
 
+                    <div className="room-selector">
+                        <label>Room</label>
+                        <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
+                            {roomData.map((room, index) => {
+                                return (
+                                    <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
+                                )
+                            })}
+                        </select>
+                    </div>
+
                     {tooltip.visible && !showPopup && (
                         <div
                             className="tooltip"
@@ -343,16 +352,7 @@ const handleSelectModule = (module) => {
                 </label>
             )}
 
-            <div className="room-selector">
-                <label>Room</label>
-                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
-                    {roomData.map((room, index) => {
-                        return (
-                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
-                        )
-                    })}
-                </select>
-            </div>
+
 
         </div>
     );

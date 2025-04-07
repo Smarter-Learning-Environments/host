@@ -258,7 +258,6 @@ const RoomSelection = () => {
                 </div>
             </div>
             
-
             <div className="graphs-container">
                 {isNoData && (
                     <label className="error-msg">¡No se encontraron datos en el rango de tiempo seleccionado!</label> )}
@@ -292,6 +291,17 @@ const RoomSelection = () => {
                 </form>
             </div>
 
+            <div className="room-selector">
+                <label>Cuarto</label>
+                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
+                    {roomData.map((room, index) => {
+                        return (
+                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
+                        )
+                    })}
+                </select>
+            </div>
+
             {tooltip.visible && (
                 <div
                     className="tooltip"
@@ -311,17 +321,6 @@ const RoomSelection = () => {
                     dangerouslySetInnerHTML={{ __html: tooltip.content }}
                 />
             )}
-
-            <div className="room-selector">
-                <label>Cuarto</label>
-                <select value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)}>
-                    {roomData.map((room, index) => {
-                        return (
-                            <option key={room.room_id} value={room.room_id}>{room.room_name}</option>
-                        )
-                    })}
-                </select>
-            </div>
 
         </div>
     );

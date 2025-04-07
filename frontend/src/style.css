@@ -170,7 +170,6 @@ button[type="button"] {
     position: fixed;
     bottom: 5px;
     left: 5px;
-    background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     width: 200px;
 }
@@ -310,3 +309,13 @@ button[type="button"] {
     box-shadow: 0 0 12px rgba(40, 167, 69, 0.4);
     background-color: #e6ffed;
   }  
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 10;
+  }
+  

@@ -6,19 +6,28 @@ UPDATE_UNREG_QUERY = """
     UPDATE registration SET module_id = %s WHERE hw_id = %s
 """
 
+GET_SENSORS_FROM_ID_QUERY = """
+    SELECT sensor_id, sensor_type, sensor_unit FROM sensors WHERE module_id = %s
+"""
+
 GET_UNREG_QUERY = """
-    SELECT hw_id, num_sensors FROM registration WHERE module_id IS NULL;
+    SELECT module_id FROM modules WHERE position_x IS NULL LIMIT 1;
 """
 
-INSERT_MODULE_QUERY = """
-    INSERT INTO modules (room_id, position_x, position_y, position_z)
-    VALUES (%s, %s, %s, %s)
-    RETURNING module_id;
+UPDATE_MODULE_QUERY = """
+    UPDATE modules 
+    SET room_id = %s,
+        position_x = %s,
+        position_y = %s,
+        position_z = %s
+    WHERE module_id = %s
 """
 
-INSERT_SENSOR_QUERY = """
-    INSERT INTO sensors (sensor_type, sensor_unit, module_id)
-    VALUES (%s, %s, %s);
+UPDATE_SENSOR_QUERY = """
+    UPDATE sensors
+    SET sensor_type = %s,
+        sensor_unit = %s
+    WHERE module_id = %s AND sensor_type = %s;
 """
 
 LATEST_READINGS_QUERY = """

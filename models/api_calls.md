@@ -214,17 +214,28 @@ gets most recent n datapoints from each sensor
 }
 ```
 
-## /get-unregistered-modules
+## /get-unregistered-module
 **GET**
-gets all modules from registration table that are not yet registered (module_id NULL)
+gets a module from registration table that is not yet registered (module_id NULL)
 
 ```json
-    [
-        {"hw_id": "A36",
-        "num_sensors": 4},
-        {"hw_id": "B92",
-        "num_sensors": 2},
+{
+    "hw_id": "A36",
+    "sensors": [
+        {
+            "sensor_id": 4,
+            "sensor_type": "Temp",
+            "sensor_unit": "C"
+        },
+        {
+            "sensor_id": 5,
+            "sensor_type": "CO2",
+            "sensor_unit": "ppm"
+        }
+        //...
     ]
+}
+
 ```
 
 ## /register-module
