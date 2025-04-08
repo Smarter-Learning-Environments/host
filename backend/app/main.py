@@ -164,12 +164,18 @@ def get_latest_reading(room_id: int, response: Response):
     res = []
     idx = 0
     for module_id, module_df in df.groupby('module_id'):
+
+        x = module_df.iloc[0]['position_x']
+        y = module_df.iloc[0]['position_y']
+        z = module_df.iloc[0]['position_z']
+        x = int(-1) if pd.isna(x) else int(x)
+        y = int(-1) if pd.isna(y) else int(y)
+        z = int(-1) if pd.isna(z) else int(z)
+
         res.append({
             "module_id": module_id,
             "module_xyz": [
-                int(module_df.iloc[0]['position_x']), # TODO fix nonetype error
-                int(module_df.iloc[0]['position_y']),
-                int(module_df.iloc[0]['position_z'])
+                x, y, z #TODO FIX NONETYPE ERROR
             ],
             "sensors": []
         })

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css"; 
 import { useNavigate } from "react-router-dom";
-import RoomSelector from "./subcomponents/RoomSelector";
+import { RoomSelector, DataTooltip } from "./subcomponents/";
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -43,19 +43,19 @@ const RoomSelection = () => {
           ?.split("=")[1] === "true");
       }, [navigate]);
 
-    useEffect(() => {
-        const fetchAll = async () => {
-            try {
-                await fetchLast();
-                await fetchRoomData();
-                await fetchUnregisteredModule();
-            } catch (err) {
-                console.error("Error during data fetch:", err);
-            }
-        };
+    const fetchAll = async () => {
+        try {
+            await fetchLast();
+            await fetchRoomData();
+            await fetchUnregisteredModule();
+        } catch (err) {
+            console.error("Error during data fetch:", err);
+        }
+    };
 
+    useEffect(() => {
         fetchAll();
-    }, [roomNumber]);
+    }, [roomNumber, showPopup]);
 
     const fetchUnregisteredModule = async () => {
         try {
@@ -105,17 +105,7 @@ const RoomSelection = () => {
           };
           return updated;
         });
-      };      
-
-    const addSensor = () => {
-        setSensors([...sensors, { sensor_type: "", sensor_unit: "" }]);
-    };
-
-    const removeSensor = (index) => {
-        if (sensors.length === 1) return;
-        const updatedSensors = sensors.filter((_, i) => i !== index);
-        setSensors(updatedSensors);
-    };
+      };
 
     const handleMouseMove = (event) => {
         if (!imageRef.current) return;
@@ -133,6 +123,10 @@ const RoomSelection = () => {
         setMousePos({ x: trueX, y: trueY }); // Normalized coordinates
     };
 
+    const handleCancel = () => {
+        setSelectedModule(null);
+        setShowPopup(false)
+    };
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -161,13 +155,13 @@ const RoomSelection = () => {
             if (!response.ok) throw new Error("Failed to place module");
 
             alert("Module placed successfully!");
-            fetchLast();
+            await fetchAll();
+            setSelectedModule(null);
             setShowPopup(false);
             setSensors([{ sensor_type: "", sensor_unit: "" }]); // Reset form
         } catch (error) {
             alert(error.message);
         }
-        await fetchUnregisteredModule();
     };
 
     const scalePosition = (x, y) => {
@@ -196,7 +190,7 @@ const RoomSelection = () => {
 
     const getTooltipContent = (module) => {
         return (
-            `<strong>Module ID:</strong> ${module.module_id}<br/>` +
+            `<strong>ID del Módulo:</strong> ${module.module_id}<br/>` +
             module.sensors.map(sensor => {
                 const latest = sensor.readings.at(-1); // Get the most recent reading
                 return `${sensor.sensor_type}: ${latest.value} ${sensor.sensor_units}`;
@@ -253,6 +247,7 @@ const handleSelectModule = (module) => {
                         {!showPopup && Array.isArray(latestModules) && 
                             latestModules.map((module, index) => {
                                 const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
+                                if(module.module_xyz[0] < 0) return null;
                                 return (
                                     <div
                                         key={index}
@@ -279,23 +274,21 @@ const handleSelectModule = (module) => {
 
                     {Object.keys(unregisteredModule).length > 0 && (
                         <div className={`placement-alert ${selectedModule ? "selected-module" : ""}`}>
-                            <h3>Unregistered Module Found</h3>
-                            <p>HW ID: {unregisteredModule.hw_id}</p>
-                            <button onClick={() => handleSelectModule(unregisteredModule)}>
-                            Place This Module
-                            </button>
+                            <h3>Se encontró un módulo no registrado</h3>
+                            <p>ID: {unregisteredModule.hw_id}</p>
+                            <button onClick={() => handleSelectModule(unregisteredModule)}>Colocar este módulo</button>
                         </div>
                     )}
 
                     <div className="admin-logout">
-                        <button onClick={handleLogout}>Logout</button>
+                        <button onClick={handleLogout}>Cerrar sesión</button>
                     </div>
 
                     {showPopup && (
                             <div className="popup-overlay">
                                 <div className="popup-content">
-                                    <h2>Place Module</h2>
-                                    <p>Position: X: {recentMousePos.x}, Y: {recentMousePos.y}</p>
+                                    <h2>Colocar Módulo</h2>
+                                    <p>Posición: X: {recentMousePos.x}, Y: {recentMousePos.y}</p>
                                     <form onSubmit={handleSubmit}>
                                         {sensors.map((sensor, index) => (
                                             <div key={index} className="sensor-row">
@@ -313,12 +306,10 @@ const handleSelectModule = (module) => {
                                                     onChange={(e) => handleInputChange(index, "sensor_unit", e.target.value)}
                                                     required
                                                 />
-                                                <button type="button" onClick={() => removeSensor(index)}>-</button>
                                             </div>
                                         ))}
-                                        <button type="button" onClick={addSensor}>+ Add Sensor</button>
-                                        <button type="submit">Submit</button>
-                                        <button type="button" onClick={() => setShowPopup(false)}>Cancel</button>
+                                        <button type="submit">Enviar</button>
+                                        <button type="button" onClick={handleCancel}>Cancelar</button>
                                     </form>
                                 </div>
                             </div>

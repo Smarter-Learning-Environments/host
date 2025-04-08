@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
 import SensorGraph from "./SensorGraph";
-import RoomSelector from "./subcomponents/RoomSelector";
+import { RoomSelector, DataTooltip } from "./subcomponents/";
 
 const RoomSelection = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -218,9 +218,8 @@ const RoomSelection = () => {
                     <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
                         {latestModules.map((module, index) => {
                             const { left, top } = scalePosition(module.module_xyz[0], module.module_xyz[1]);
-
-                            return (
-                                <div
+                            if(module.module_xyz[0] < 0) return null;
+                            return (<div
                                     key={module.module_id}
                                     className="sensor-dot"
                                     style={{ left: `${left}px`, top: `${top}px` }}
@@ -294,26 +293,7 @@ const RoomSelection = () => {
 
             <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
 
-
-            {tooltip.visible && (
-                <div
-                    className="tooltip"
-                    style={{
-                        position: "fixed",
-                        left: tooltip.x + 10,
-                        top: tooltip.y + 10,
-                        background: "white",
-                        border: "1px solid #ccc",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
-                        zIndex: 999,
-                        pointerEvents: "none",
-                        fontSize: "12px"
-                    }}
-                    dangerouslySetInnerHTML={{ __html: tooltip.content }}
-                />
-            )}
+            <DataTooltip tooltip={tooltip} />
 
         </div>
     );
