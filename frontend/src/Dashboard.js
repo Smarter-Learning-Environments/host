@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
-import SensorGraph from "./SensorGraph";
-import { RoomSelector, DataTooltip } from "./subcomponents/";
+import SensorGraph from "./subcomponents/SensorGraph";
+import { RoomSelector, DataTooltip } from "./subcomponents";
 
-const RoomSelection = () => {
+const Dashboard = () => {
     const [selectedFactors, setSelectedFactors] = useState({
         co2: false,
         pm25: false,
@@ -299,4 +299,4 @@ const RoomSelection = () => {
     );
 };
 
-export default RoomSelection;
+export default Dashboard;

@@ -3,7 +3,7 @@ import "./style.css";
 import { useNavigate } from "react-router-dom";
 import { RoomSelector, DataTooltip } from "./subcomponents/";
 
-const RoomSelection = () => {
+const RoomAdmin = () => {
     const [selectedFactors, setSelectedFactors] = useState({
         co2: false,
         pm25: false,
@@ -351,4 +351,4 @@ const handleSelectModule = (module) => {
     );
 };
 
-export default RoomSelection;
+export default RoomAdmin;

@@ -2,8 +2,11 @@ import psycopg2
 import pandas as pd
 from . import broker, db, sql
 from fastapi import FastAPI, Response, status
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .utils import *
+import io
+import csv
 
 origins = [
     "http://localhost",
@@ -31,6 +34,25 @@ def read_root():
     # TODO health/status endpoint for docker
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
+
+@app.get("/export-data")
+def export_data(response: Response):
+    try:
+        columns, results = db.execute_sql(sql.GET_ALL_DATA_QUERY, column_names=True)
+        df = pd.DataFrame(results, columns=columns)
+
+        tsv_str = df.to_csv(index=False, na_rep='')
+
+        response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+        return tsv_str
+
+    except psycopg2.Error as e:
+        response.status_code = 500
+        return f"Database error: {e.pgerror}"
+    except Exception as e:
+        response.status_code = 500
+        return f"Unknown error: {str(e)}"
+    
 
 @app.post("/discover-module")
 def discover_module(module: DiscoverableModule, response: Response):

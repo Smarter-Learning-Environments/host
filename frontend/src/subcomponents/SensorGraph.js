@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
-import "./style.css"; // make sure this includes the styles we'll add below
+import "../style.css";
 
 const SensorGraph = ({ title, sensorSeries }) => {
     const containerRef = useRef();
@@ -35,7 +35,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
         x.domain(d3.extent(allPoints, d => new Date(d.x)));
         y.domain([0, d3.max(allPoints, d => d.y)*1.1]);
 
-        const xTicks = Math.max(2, Math.floor(width/150));
+        const xTicks = Math.max(3, Math.floor(width/150));
         const xAxis = d3.axisBottom(x)
             .ticks(xTicks)
             .tickFormat(d3.timeFormat("%d/%m/%y %H:%M"));

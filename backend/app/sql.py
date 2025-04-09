@@ -1,3 +1,23 @@
+GET_ALL_DATA_QUERY = """
+    SELECT 
+        r.room_id,
+        r.room_name,
+        m.module_id,
+        m.position_x,
+        m.position_y,
+        m.position_z,
+        s.sensor_id,
+        s.sensor_type,
+        s.sensor_unit,
+        rec.record_time,
+        rec.record_value
+    FROM room r
+    LEFT JOIN modules m ON r.room_id = m.room_id
+    LEFT JOIN sensors s ON m.module_id = s.module_id
+    LEFT JOIN records rec ON s.sensor_id = rec.sensor_id
+    ORDER BY r.room_id, m.module_id, s.sensor_id, rec.record_time;
+"""
+
 GET_ROOM_QUERY = """
     SELECT * FROM room
 """
