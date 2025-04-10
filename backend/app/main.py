@@ -12,9 +12,6 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3001"
-    "*:3001",
-    "http://0.0.0.0:3000",
-    "http://0.0.0.0:3001",
 ]
 
 def startServer() -> FastAPI:
@@ -26,6 +23,7 @@ app = startServer()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origins_regex=["*:3000", "*:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
