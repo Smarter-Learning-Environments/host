@@ -152,9 +152,9 @@ const RoomAdmin = () => {
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) throw new Error("Failed to place module");
+            if (!response.ok) throw new Error("No se pudo colocar el módulo");
 
-            alert("Module placed successfully!");
+            alert("¡Módulo colocado exitosamente!");
             await fetchAll();
             setSelectedModule(null);
             setShowPopup(false);

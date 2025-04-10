@@ -41,10 +41,13 @@ def export_data(response: Response):
         columns, results = db.execute_sql(sql.GET_ALL_DATA_QUERY, column_names=True)
         df = pd.DataFrame(results, columns=columns)
 
-        tsv_str = df.to_csv(index=False, na_rep='')
+        csv_data = df.to_csv(index=False, encoding="utf-8-sig")
 
-        response.headers["Content-Disposition"] = "attachment; filename=data.csv"
-        return tsv_str
+        return StreamingResponse(
+            csv_data,
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": "attachment; filename=data.csv"}
+        )
 
     except psycopg2.Error as e:
         response.status_code = 500

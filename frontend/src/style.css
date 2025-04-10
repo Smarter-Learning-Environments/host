@@ -318,3 +318,8 @@ button[type="button"] {
     z-index: 10;
   }
   
+  .export-button {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+  }

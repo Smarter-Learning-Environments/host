@@ -210,6 +210,23 @@ const Dashboard = () => {
         fetchData();
     }
 
+    const handleExport = async () => {
+        try {
+            const res = await fetch(`http://localhost:8000/export-data`);
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "data.csv");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            console.error("Error fetching export data: ", err);
+        }
+    };
+
     return (
         <div className="main-container">
 
@@ -256,6 +273,7 @@ const Dashboard = () => {
                     </tbody></table>
                     <button id="submittime" onClick={handleTimeSubmit}>Enviar</button>
                 </div>
+                
             </div>
             
             <div className="graphs-container">
@@ -292,6 +310,8 @@ const Dashboard = () => {
             </div>
 
             <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
+
+            <button className="export-button" onClick={handleExport}>Exportar Datos</button>
 
             <DataTooltip tooltip={tooltip} />
 

@@ -110,8 +110,8 @@ const SensorGraph = ({ title, sensorSeries }) => {
                     tooltip
                         .html(`
                             <strong>Sensor:</strong> ${series.label}<br/>
-                            <strong>Value:</strong> ${d.y} ${units}<br/>
-                            <strong>Time:</strong> ${new Date(d.x).toLocaleTimeString()}
+                            <strong>Valor:</strong> ${d.y} ${units}<br/>
+                            <strong>Tiempo:</strong> ${new Date(d.x).toLocaleTimeString()}
                         `)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px")
