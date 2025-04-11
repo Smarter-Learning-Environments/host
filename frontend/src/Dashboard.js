@@ -182,7 +182,7 @@ const Dashboard = () => {
         navigate("/room-admin");
 
         try {
-            // const response = await fetch("/admin-login", {
+            // const response = await fetch("http://localhost:8000/admin-login", {
             //     method: "POST",
             //     headers: { "Content-Type": "application/json" },
             //     body: JSON.stringify(adminPass),
@@ -294,7 +294,7 @@ const Dashboard = () => {
             </div>
             
             <div className="admin-login">
-                <a href="https://youtube.com" target="_blank">¡Toma nuestra encuesta!</a>
+                <a href="https://wpi.qualtrics.com/jfe/form/SV_bHPaIcQzv8w9A3Q" target="_blank">¡Toma nuestra encuesta!</a>
                 <form onSubmit={handleLogin}>
                     <input 
                         type="password" 
