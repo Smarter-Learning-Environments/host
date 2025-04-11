@@ -2,6 +2,7 @@ GET_ALL_DATA_QUERY = """
     SELECT 
         r.room_id,
         r.room_name,
+        r.img_path,
         m.module_id,
         m.position_x,
         m.position_y,

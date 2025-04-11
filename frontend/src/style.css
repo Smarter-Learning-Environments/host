@@ -323,3 +323,9 @@ button[type="button"] {
     top: 5px;
     right: 5px;
   }
+
+  .import-data {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+  }

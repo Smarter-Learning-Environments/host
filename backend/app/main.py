@@ -1,7 +1,7 @@
 import psycopg2
 import pandas as pd
 from . import broker, db, sql
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, status, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .utils import *
@@ -34,6 +34,84 @@ def read_root():
     # TODO health/status endpoint for docker
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
+
+@app.post("/import-data")
+async def import_data(file: UploadFile = File(...), response: Response = None):
+    try:
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode("utf-8")))
+
+        inserted_rooms = set()
+        inserted_modules = set()
+        inserted_sensors = set()
+        inserted_records = 0
+
+        for _, row in df.iterrows():
+            room_id = int(row["room_id"]) if not pd.isna(row["room_id"]) else None
+            room_name = row["room_name"] if not pd.isna(row["room_name"]) else None
+            img_path = row["img_path"] if not pd.isna(row["img_path"]) else None
+            
+            module_id = str(row["module_id"]) if not pd.isna(row["module_id"]) else None
+            x = int(row["position_x"]) if not pd.isna(row["position_x"]) else None
+            y = int(row["position_y"]) if not pd.isna(row["position_y"]) else None
+            z = int(row["position_z"]) if not pd.isna(row["position_z"]) else None
+
+            sensor_id = int(row["sensor_id"]) if not pd.isna(row["sensor_id"]) else None
+            sensor_type = row["sensor_type"] if not pd.isna(row["sensor_type"]) else None
+            sensor_unit = row["sensor_unit"] if not pd.isna(row["sensor_unit"]) else None
+
+            record_time = int(row["record_time"]) if not pd.isna(row["record_time"]) else None
+            record_value = float(row["record_value"]) if not pd.isna(row["record_value"]) else None
+
+            # Insert Room
+            if room_id and room_id not in inserted_rooms:
+                db.execute_insert(
+                    """INSERT INTO room (room_id, room_name, img_path)
+                       VALUES (%s, %s, %s) ON CONFLICT (room_id) DO NOTHING;""",
+                    args=(room_id, room_name, img_path)
+                )
+                inserted_rooms.add(room_id)
+
+            # Insert Module
+            if module_id and module_id not in inserted_modules:
+                db.execute_insert(
+                    """INSERT INTO modules (module_id, room_id, position_x, position_y, position_z)
+                       VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
+                    args=(module_id, room_id, x, y, z)
+                )
+                inserted_modules.add(module_id)
+
+            # Insert Sensor
+            if sensor_id and module_id and sensor_id not in inserted_sensors:
+                db.execute_insert(
+                    """INSERT INTO sensors (sensor_id, sensor_type, sensor_unit, module_id)
+                       VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
+                    args=(sensor_id, sensor_type, sensor_unit, module_id)
+                )
+                inserted_sensors.add(sensor_id)
+
+            # Insert Record
+            if record_time and record_value and sensor_id:
+                db.execute_insert(
+                    """INSERT INTO records (module_id, record_time, record_value, sensor_id)
+                       VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
+                    args=(module_id, record_time, record_value, sensor_id)
+                )
+                inserted_records += 1
+
+        return {
+            "status": "success",
+            "inserted": {
+                "rooms": len(inserted_rooms),
+                "modules": len(inserted_modules),
+                "sensors": len(inserted_sensors),
+                "records": inserted_records
+            }
+        }
+
+    except Exception as e:
+        response.status_code = 500
+        return {"status": "error", "message": str(e)}
 
 @app.get("/export-data")
 def export_data(response: Response):

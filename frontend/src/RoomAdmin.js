@@ -31,6 +31,7 @@ const RoomAdmin = () => {
     const [roomData, setRoomData] = useState([]);
     const [unregisteredModule, setUnregisteredModule] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
+    const fileInputRef = useRef(null);
 
     //CHECK FOR UNREGISTERED MODULES
 
@@ -202,42 +203,50 @@ const RoomAdmin = () => {
         document.cookie = "admin_logged_in=; path=/; max-age=0";
         navigate("/");
     };
-      
-    const handleRegister = async (formData) => {
-    try {
-        const res = await fetch("http://localhost:8000/register-module", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-        });
 
-        if (!res.ok) throw new Error("Failed to register module");
-        alert("Module registered successfully!");
+    const handleImport = async (event) => {
+        const file = event.target.files[0];
+        if(!file) return;
 
-        // Refresh unregistered list
-        fetchUnregisteredModule();
+        const formData = new FormData();
+        formData.append("file", file);
 
-    } catch (err) {
-        console.error(err);
-        alert("Error registering module.");
-    }
-};
+        try {
+            const res = await fetch("http://localhost:8000/import-data", {
+                method: "POST",
+                body: formData,
+            });
 
-const handleSelectModule = (module) => {
-    setSelectedModule(module);
+            if(!res.ok) throw new Error("Failed to import data");
+            const result = await res.json();
+            // alert("Import success:\n" + JSON.stringify(result, null, 2));
+            fetchAll();
 
-    // Auto-fill with empty sensor_type/unit fields
-    const prefilled = [];
-    for(const sensor of module.sensors) {
-        prefilled.push({
-            "original_type": sensor.sensor_type,
-            "sensor_type": sensor.sensor_type, 
-            "sensor_unit": sensor.sensor_unit
-        });
-    }
-    setSensors(prefilled);
-};
-    
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleSelectModule = (module) => {
+        setSelectedModule(module);
+
+        // Auto-fill with empty sensor_type/unit fields
+        const prefilled = [];
+        for(const sensor of module.sensors) {
+            prefilled.push({
+                "original_type": sensor.sensor_type,
+                "sensor_type": sensor.sensor_type, 
+                "sensor_unit": sensor.sensor_unit
+            });
+        }
+        setSensors(prefilled);
+    };
+        
     return (
         <div>
             {isLoggedIn && (
@@ -316,6 +325,19 @@ const handleSelectModule = (module) => {
                     )}
 
                     <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
+
+                    <div className="import-data">
+                        <input
+                            type="file"
+                            accept=".csv"
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            onChange={handleImport}
+                        />
+                        <button onClick={triggerFileInput}>
+                            Importar datos CSV
+                        </button>
+                    </div>
 
                     {tooltip.visible && !showPopup && (
                         <div
