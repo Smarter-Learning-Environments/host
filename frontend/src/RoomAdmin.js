@@ -363,7 +363,7 @@ const RoomAdmin = () => {
                 
             {!isLoggedIn && (
                 <label className="error-msg">
-                    Error! Not authenticated as admin
+                    ¡Error! No estás autenticado como administrador
                 </label>
             )}
 
