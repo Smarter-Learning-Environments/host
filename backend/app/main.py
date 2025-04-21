@@ -171,23 +171,25 @@ def get_unregistered_module(response: Response): # TODO return multiple results
     if df.empty:
         return {}
 
-    res = {
-        "hw_id": df.iloc[0]['module_id'],
-        "sensors": []
-    }
+    res = []
     
-    columns, results = db.execute_sql(sql.GET_SENSORS_FROM_ID_QUERY, args=(df.iloc[0]['module_id'],), column_names=True)
-    sdf = pd.DataFrame(results, columns=columns)
+    for module_id, module_df in df.groupby('module_id'):
+        mod_data = { "hw_id": module_id, "sensors": [] }
     
-    if sdf.empty:
-        return JSONResponse(res, 404)
-    
-    for sensor_id, sensor_df in sdf.groupby('sensor_id'):
-        res["sensors"].append({
-            "sensor_id": int(sensor_df.iloc[0]['sensor_id']),
-            "sensor_type": sensor_df.iloc[0]['sensor_type'],
-            "sensor_unit": sensor_df.iloc[0]['sensor_unit']
-        })
+        columns, results = db.execute_sql(sql.GET_SENSORS_FROM_ID_QUERY, args=(module_id,), column_names=True)
+        sdf = pd.DataFrame(results, columns=columns)
+        
+        if sdf.empty:
+            return JSONResponse(res, 404)
+        
+        for sensor_id, sensor_df in sdf.groupby('sensor_id'):
+            mod_data["sensors"].append({
+                "sensor_id": int(sensor_df.iloc[0]['sensor_id']),
+                "sensor_type": sensor_df.iloc[0]['sensor_type'],
+                "sensor_unit": sensor_df.iloc[0]['sensor_unit']
+            })
+        
+        res.append(mod_data)
 
     return res
 

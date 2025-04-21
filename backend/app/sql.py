@@ -32,7 +32,7 @@ GET_SENSORS_FROM_ID_QUERY = """
 """
 
 GET_UNREG_QUERY = """
-    SELECT module_id FROM modules WHERE position_x IS NULL LIMIT 1;
+    SELECT module_id FROM modules WHERE position_x IS NULL;
 """
 
 UPDATE_MODULE_QUERY = """

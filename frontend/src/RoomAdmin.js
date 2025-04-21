@@ -33,10 +33,6 @@ const RoomAdmin = () => {
     const [selectedModule, setSelectedModule] = useState(null);
     const fileInputRef = useRef(null);
 
-    //CHECK FOR UNREGISTERED MODULES
-
-    
-
     useEffect(() => {
         setIsLoggedIn(document.cookie
           .split("; ")
@@ -128,9 +124,11 @@ const RoomAdmin = () => {
         setSelectedModule(null);
         setShowPopup(false)
     };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        console.log(`hw id is ${selectedModule.hw_id}`);
         const payload = {
             hw_id: selectedModule.hw_id,
             room_id: roomNumber,
@@ -281,13 +279,17 @@ const RoomAdmin = () => {
                         })}
                     </div>
 
-                    {Object.keys(unregisteredModule).length > 0 && (
-                        <div className={`placement-alert ${selectedModule ? "selected-module" : ""}`}>
-                            <h3>Se encontró un módulo no registrado</h3>
-                            <p>ID: {unregisteredModule.hw_id}</p>
-                            <button onClick={() => handleSelectModule(unregisteredModule)}>Colocar este módulo</button>
-                        </div>
-                    )}
+                    <div className="unregistered-module-alerts">
+                        {unregisteredModule.length > 0 && unregisteredModule.map((module, index) => {
+                            return (
+                                <div className={`placement-alert ${(selectedModule != null) && (selectedModule.hw_id == module.hw_id) ? "selected-module" : ""}`}>
+                                    <h3>Se encontró un módulo no registrado</h3>
+                                    <p>ID: {module.hw_id}</p>
+                                    <button onClick={() => handleSelectModule(module)}>Colocar este módulo</button>
+                                </div>
+                            )
+                        })}
+                    </div>
 
                     <div className="admin-logout">
                         <button onClick={handleLogout}>Cerrar sesión</button>
