@@ -169,7 +169,7 @@ def get_unregistered_module(response: Response): # TODO return multiple results
     df = pd.DataFrame(results, columns=columns)
 
     if df.empty:
-        return {}
+        return JSONResponse({}, 404)
 
     res = {
         "hw_id": df.iloc[0]['module_id'],
@@ -178,9 +178,6 @@ def get_unregistered_module(response: Response): # TODO return multiple results
     
     columns, results = db.execute_sql(sql.GET_SENSORS_FROM_ID_QUERY, args=(df.iloc[0]['module_id'],), column_names=True)
     sdf = pd.DataFrame(results, columns=columns)
-    
-    if sdf.empty:
-        return JSONResponse(res, 404)
     
     for sensor_id, sensor_df in sdf.groupby('sensor_id'):
         res["sensors"].append({
@@ -209,7 +206,6 @@ def get_room_data(response: Response):
 
 
 @app.get("/get-latest-reading/{room_id}")
-@set_404_if_field_empty("sensors", "Unregistered module has no constituent sensors")
 def get_latest_reading(room_id: int, response: Response):
     df = None
 
@@ -217,7 +213,7 @@ def get_latest_reading(room_id: int, response: Response):
     df = pd.DataFrame(results, columns=columns)
 
     if df.empty:
-        return JSONResponse(res, 404)
+        return JSONResponse({}, 404)
 
     res = []
     idx = 0
@@ -266,7 +262,7 @@ def get_data_timerange(room_id: int, time_start: int, time_end: int, response: R
     # TODO Query params to filter by module? Room? Sensor 
 
     if df.empty:
-        return JSONResponse(res, 404)
+        return JSONResponse({}, 404)
     
     res = []
     module_idx = 0
