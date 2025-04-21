@@ -17,7 +17,6 @@ def on_message(client, userdata, msg: mqtt.MQTTMessage):
 
     # Topic contains:
     # sensor_service / Module ID / Sensor ID
-    # TODO sensor type, not sensor ID
 
 
     split_topic = msg.topic.split('/')
