@@ -57,7 +57,7 @@ const Dashboard = () => {
 
     const fetchRoomData = async () => {
         try {
-            const res = await fetch(`${window.location.href}8000/get-room-data`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-room-data`);
             const data = await res.json();
             setRoomData(data);
         } catch (err) {
@@ -67,7 +67,7 @@ const Dashboard = () => {
  
     const fetchLast = async () => {
         try {
-            const res = await fetch(`${window.location.href}8000/get-latest-reading/${roomNumber}`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-latest-reading/${roomNumber}`);
             const data = await res.json();
             if(Array.isArray(data)) {
                 setLatestModules(data);
@@ -88,7 +88,7 @@ const Dashboard = () => {
             }
             
             console.log(`Start: ${startMS}, end: ${endMS}`);
-            const res = await fetch(`${window.location.href}8000/get-data-timerange/${roomNumber}/${startMS}/${endMS}`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-data-timerange/${roomNumber}/${startMS}/${endMS}`);
             const data = await res.json();
 
             setIsNoData(!firstDataFetch && Object.keys(data).length === 0);
@@ -182,7 +182,7 @@ const Dashboard = () => {
         event.preventDefault();
 
         try {
-            const response = await fetch("${window.location.href}8000/login-admin", {
+            const response = await fetch(`http://${window.location.hostname}:8000/login-admin`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ password: adminPass })
@@ -215,7 +215,7 @@ const Dashboard = () => {
 
     const handleExport = async () => {
         try {
-            const res = await fetch(`${window.location.href}:8000/export-data`);
+            const res = await fetch(`http://${window.location.hostname}:8000/export-data`);
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
 

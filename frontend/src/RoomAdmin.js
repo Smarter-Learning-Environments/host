@@ -60,7 +60,7 @@ const RoomAdmin = () => {
         formData.append("room_number", 1);
         formData.append("img_file", selectedFile);
 
-        const response = await fetch(`${window.location.href}:8000/upload-floorplan`, {
+        const response = await fetch(`http://${window.location.hostname}:8000/upload-floorplan`, {
             method: "POST",
             body: formData,
         });
@@ -71,7 +71,7 @@ const RoomAdmin = () => {
 
     const fetchUnregisteredModule = async () => {
         try {
-            const res = await fetch(`${window.location.href}:8000/get-unregistered-module`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-unregistered-module`);
             const data = await res.json();
             setUnregisteredModule(data);
         } catch (err) {
@@ -81,7 +81,7 @@ const RoomAdmin = () => {
 
     const fetchRoomData = async () => {
         try {
-            const res = await fetch(`${window.location.href}:8000/get-room-data`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-room-data`);
             const data = await res.json();
             setRoomData(data);
         } catch (err) {
@@ -158,7 +158,7 @@ const RoomAdmin = () => {
         };
 
         try {
-            const response = await fetch(`${window.location.href}:8000/register-module`, {
+            const response = await fetch(`http://${window.location.hostname}:8000/register-module`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -194,7 +194,7 @@ const RoomAdmin = () => {
 
     const fetchLast = async () => {
         try {
-            const res = await fetch(`${window.location.href}:8000/get-latest-reading/${roomNumber}`);
+            const res = await fetch(`http://${window.location.hostname}:8000/get-latest-reading/${roomNumber}`);
             const data = await res.json();
             setLatestModules(data);
         } catch (err) {
@@ -225,7 +225,7 @@ const RoomAdmin = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch(`${window.location.href}:8000/import-data`, {
+            const res = await fetch(`http://${window.location.hostname}:8000/import-data`, {
                 method: "POST",
                 body: formData,
             });
