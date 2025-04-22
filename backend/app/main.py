@@ -147,7 +147,7 @@ def export_data(response: Response):
 @app.post("/discover-module")
 def discover_module(module: DiscoverableModule, response: Response):
     # TODO check if already exists
-    db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id))
+    db.execute_sql(sql.DISCOVER_MODULE, args=(module.hw_id,))
     for i, sensor in enumerate(module.sensor_descriptions):
         db.execute_sql(sql.DISCOVER_SENSOR, args=(module.hw_id, i, sensor))
     
