@@ -281,6 +281,11 @@ button[type="button"] {
     color: red;
 }
 
+.admin-login p {
+    font-size: 12px;
+    margin: 0;
+}
+
 .d3-tooltip {
     z-index: 9999;
 }

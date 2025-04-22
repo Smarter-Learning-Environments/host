@@ -5,6 +5,9 @@ from functools import wraps
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
+class LoginRequest(BaseModel):
+    password: str
+
 class SensorIn(BaseModel):
     sensor_type: str
     sensor_unit: str

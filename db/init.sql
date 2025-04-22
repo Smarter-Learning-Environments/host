@@ -4,6 +4,7 @@ CREATE TABLE room (
     x_max int,
     y_max int,
     z_max int,
+    img_data BYTEA,
     img_path varchar
 );
 
@@ -75,3 +76,10 @@ CREATE TABLE registration (
     num_sensors int NOT NULL,
     is_registered boolean
 );
+
+CREATE TABLE credentials (
+    id int PRIMARY KEY,
+    pass varchar(49)
+);
+
+INSERT INTO credentials (id, pass) VALUES (1, "p123");

@@ -7,7 +7,7 @@ from .utils import *
 from . import broker, db, sql
 from pydantic import ValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Response, UploadFile, File
+from fastapi import FastAPI, Response, UploadFile, File, Form
 from fastapi.responses import StreamingResponse, JSONResponse
 
 origins = [
@@ -56,6 +56,34 @@ def read_root():
     # TODO health/status endpoint for docker
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
+
+@app.post("/upload-floorplan")
+async def upload_floorplan(room_number: int = Form(...), img_file: UploadFile = File(...)):
+    try:
+        img_data = await img_file.read()
+
+        db.execute_insert(sql.INSERT_FLOORPLAN_QUERY, args=(db.psycopg2.Binary(img_data), room_number))
+
+        return {"success": True}
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.post("/login-admin")
+def login_admin(request: LoginRequest, response: Response):
+    columns, results = db.execute_sql(sql.LOGIN_ADMIN_QUERY, column_names=True)
+    if results is None:
+        response.status_code = 404
+        return {"error": "No se encontraron credenciales de administrador"}
+    df = pd.DataFrame(results, columns=columns)
+    if df.empty:
+        response.status_code = 404
+        return {"error": "Admin credentials not found"}
+    
+    res = {}
+    if request.password == df.iloc[0]["pass"]:
+        return {"success": "true"}
+    return {"error": "¡contraseña incorrecta!"}
 
 @app.post("/import-data")
 async def import_data(file: UploadFile = File(...), response: Response = None):

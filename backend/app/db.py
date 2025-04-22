@@ -45,4 +45,3 @@ def execute_insert(sql: str, args: tuple = None, conn = conn, returning: bool = 
             curs.execute(sql, args if args else ())
             if returning:
                 return curs.fetchone()[0]
-

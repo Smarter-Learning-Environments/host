@@ -32,6 +32,7 @@ const RoomAdmin = () => {
     const [unregisteredModule, setUnregisteredModule] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
     const fileInputRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
         setIsLoggedIn(document.cookie
@@ -53,6 +54,20 @@ const RoomAdmin = () => {
     useEffect(() => {
         fetchAll();
     }, [roomNumber, showPopup]);
+
+    const handleUploadFloorplan = async (e) => {
+        const formData = new FormData();
+        formData.append("room_number", 1);
+        formData.append("img_file", selectedFile);
+
+        const response = await fetch("http://localhost:8000/upload-floorplan", {
+            method: "POST",
+            body: formData,
+        });
+    
+        const data = await response.json();
+        // console.log(data);
+    }
 
     const fetchUnregisteredModule = async () => {
         try {
@@ -278,6 +293,9 @@ const RoomAdmin = () => {
                                 )
                         })}
                     </div>
+
+                    <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
+                    <button onClick={handleUploadFloorplan}>Upload Floorplan</button>
 
                     <div className="unregistered-module-alerts">
                         {unregisteredModule.length > 0 && unregisteredModule.map((module, index) => {

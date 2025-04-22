@@ -179,25 +179,26 @@ const Dashboard = () => {
     const handleLogin = async (event) => {
         event.preventDefault();
 
-        navigate("/room-admin");
-
         try {
-            // const response = await fetch("http://localhost:8000/admin-login", {
-            //     method: "POST",
-            //     headers: { "Content-Type": "application/json" },
-            //     body: JSON.stringify(adminPass),
-            // });
+            const response = await fetch("http://localhost:8000/login-admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: adminPass })
+            });
 
-            // if (!response.ok) {
-            //     throw new Error("Contraseña Incorrecta");
-            // }
+            const data = await response.json(); // Parse the response body
 
-            // If login is successful, navigate to RoomAdmin.js
+            if(data.error) {
+                throw new Error(data.error);
+            }
+
             document.cookie = "admin_logged_in=true; path=/; max-age=3600";
             navigate("/room-admin");
+
         } catch (error) {
             setErrorMessage(error.message);
         }
+
     };
 
     const handleStartPick = (e) => {
@@ -233,7 +234,7 @@ const Dashboard = () => {
             <div className="container">
                 <div className="image-container">
                     <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
-                        {latestModules.map((module, index) => {
+                        { (latestModules.length > 0) && latestModules.map((module, index) => {
                             const { left, top } = scalePosition(module.module_xyz[0], module.module_xyz[1]);
                             if(module.module_xyz[0] < 0) return null;
                             return (<div

@@ -1,3 +1,11 @@
+INSERT_FLOORPLAN_QUERY = """
+    UPDATE room SET img_data = %s WHERE room_id = %s
+"""
+
+LOGIN_ADMIN_QUERY = """
+    SELECT pass FROM credentials WHERE id = 1;
+"""
+
 GET_ALL_DATA_QUERY = """
     SELECT 
         r.room_id,
