@@ -67,6 +67,8 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    volumes:
+      - ./frontend/src:/frontend/src
 
 volumes:
   postgres_data:
