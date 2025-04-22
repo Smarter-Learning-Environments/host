@@ -269,6 +269,10 @@ def get_data_timerange(room_id: int, time_start: int, time_end: int, response: R
     res = []
     module_idx = 0
     for module_id, module_df in df.groupby('module_id'):
+
+        if pd.isna(module_df.iloc[0]['position_x']) or pd.isna(module_df.iloc[0]['position_y']) or pd.isna(module_df.iloc[0]['position_z']):
+            continue
+
         res.append({
             "module_id": module_id,
             "module_xyz": [
