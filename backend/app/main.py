@@ -46,6 +46,10 @@ async def db_exception_handler(request, exc: Exception):
 async def validation_exception_handler(request, exc: ValidationError):
     return JSONResponse(status_code=422, content={"error": "Validation Error", "msg": str(exc)})
 
+@app.exception_handler(ValueError)
+async def validation_exception_handler(request, exc: ValueError):
+    return JSONResponse(status_code=500, content={"error": "Value Error", "msg": str(exc)})
+
 @app.get("/")
 def read_root():
     # TODO health/status endpoint for modules
