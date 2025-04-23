@@ -162,12 +162,17 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
 def export_data(response: Response):
     def stream_csv():
         with db.conn.cursor(name='export_cursor') as cursor:
+
             cursor.itersize = 1000
             cursor.execute(sql.GET_ALL_DATA_QUERY)
 
-            yield ','.join([desc[0] for desc in cursor.description]) + '\n'
+            if cursor.description:
+                header = [desc[0] for desc in cursor.description]
+                yield ','.join(header) + '\n'
+                
             for row in cursor:
-                yield ','.join([str(item) if item is not None else '' for item in row]) + '\n'
+                frow = [str(item) if item is not None else '' for item in row]
+                yield ','.join(frow) + '\n'
 
     return StreamingResponse(
         stream_csv(),
