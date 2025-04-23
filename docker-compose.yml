@@ -1,0 +1,74 @@
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto
+    container_name: mqtt_broker
+    ports:
+      - "1883:1883"  # MQTT Port
+      - "9001:9001"  # WebSockets (if needed)
+    volumes:
+      - ./broker/config:/mosquitto/config
+      - ./broker/data:/mosquitto/data
+      - ./broker/log:/mosquitto/log
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb # TODO use secrets
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready"]
+    #   interval: 30s
+    #   timeout: 60s
+
+  backend:
+    build: ./backend
+    container_name: backend_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mqtt-broker
+      - postgres
+    environment:
+      MQTT_BROKER_HOST: mqtt-broker
+      DB_HOST: postgres
+      DB_USER: user
+      DB_PASS: password
+      DB_NAME: mydb
+      PYTHONUNBUFFERED: 1
+    # DEV - MOUNT HOT VOLUME
+    volumes:
+      - ./backend/app:/backend/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "localhost:8000"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    container_name: frontend_service
+    ports:
+      - "80:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./frontend/src:/frontend/src
+
+volumes:
+  postgres_data:
