@@ -87,7 +87,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
             .style("pointer-events", "none")
             .style("font-size", "12px")
             .style("opacity", 0);
-
+          
         sensorSeries.forEach((series, i) => {
             svg.append("path")
                 .datum(series.data)
@@ -111,7 +111,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
                         .html(`
                             <strong>Sensor:</strong> ${series.label}<br/>
                             <strong>Valor:</strong> ${d.y} ${units}<br/>
-                            <strong>Tiempo:</strong> ${new Date(d.x).toLocaleTimeString()}
+                            <strong>Tiempo:</strong> ${new Date(d.x).toLocaleTimeString('es-ES')}
                         `)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px")

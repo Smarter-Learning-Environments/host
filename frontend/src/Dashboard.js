@@ -83,11 +83,18 @@ const Dashboard = () => {
             const startMS = Math.floor(new Date(startTime).getTime()/1000);
             var endMS = Math.floor(new Date(endTime).getTime()/1000);
 
-            if(endMS === 0) {
+            if(startMS === 0 && endMS === 0) { //last hour
                 endMS = Math.floor(Date.now()/1000);
+                startMS = endMS - 60*60;
+            }
+            else if (startMS === 0) { //hour before endMS
+                startMS = endMS - 60*60;
+            }
+            else if (endMS === 0) { //hour after startMS
+                endMS = startMS + 60*60;
             }
             
-            console.log(`Start: ${startMS}, end: ${endMS}`);
+            // console.log(`Start: ${startMS}, end: ${endMS}`);
             const res = await fetch(`http://${window.location.hostname}:8000/get-data-timerange/${roomNumber}/${startMS}/${endMS}`);
             const data = await res.json();
 
