@@ -33,7 +33,8 @@ CREATE TABLE sensors (
     sensor_type varchar NULL,
     sensor_unit varchar NULL,
     module_id varchar NOT NULL,
-    foreign key (module_id) references modules(module_id)
+    foreign key (module_id) references modules(module_id),
+    CONSTRAINT pk_sensor PRIMARY KEY (sensor_id, module_id)
 );
 
 -- INSERT INTO sensors (sensor_type, sensor_unit, module_id, sensor_id) VALUES 
@@ -54,7 +55,8 @@ CREATE TABLE records (
     record_value float NOT NULL,
     sensor_id int NOT NULL,
 
-    CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id)
+    CONSTRAINT fk_module FOREIGN KEY (module_id) REFERENCES modules(module_id),
+    CONSTRAINT pk_records PRIMARY KEY (module_id, sensor_id, record_time)
 );
 
 CREATE INDEX idx_record_time ON records (record_time);
@@ -69,13 +71,6 @@ CREATE INDEX idx_module_id ON modules (module_id);
 --     ('00:11:22:33:44:55', 1743760760, 53, 3),
 --     ('66:77:88:99:AA:BB', 1743760700, 21.5, 5),
 --     ('66:77:88:99:AA:BB', 1743760760, 22.0, 5);
-
-
-CREATE TABLE registration (
-    hw_id varchar(49) PRIMARY KEY,
-    num_sensors int NOT NULL,
-    is_registered boolean
-);
 
 CREATE TABLE credentials (
     id int PRIMARY KEY,

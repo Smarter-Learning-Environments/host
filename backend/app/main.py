@@ -113,7 +113,7 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
         record_value = float(row["record_value"]) if not pd.isna(row["record_value"]) else None
 
         # Insert Room
-        if room_id and room_id not in inserted_rooms:
+        if room_id is not None and room_id not in inserted_rooms:
             db.execute_insert(
                 """INSERT INTO room (room_id, room_name, img_path)
                     VALUES (%s, %s, %s) ON CONFLICT (room_id) DO NOTHING;""",
@@ -122,16 +122,15 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
             inserted_rooms.add(room_id)
 
         # Insert Module
-        if module_id and module_id not in inserted_modules:
+        if module_id is not None and module_id not in inserted_modules:
             db.execute_insert(
                 """INSERT INTO modules (module_id, room_id, position_x, position_y, position_z)
                     VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
                 args=(module_id, room_id, x, y, z)
             )
             inserted_modules.add(module_id)
-
         # Insert Sensor
-        if sensor_id and module_id and sensor_id not in inserted_sensors:
+        if sensor_id is not None and sensor_id not in inserted_sensors:
             db.execute_insert(
                 """INSERT INTO sensors (sensor_id, sensor_type, sensor_unit, module_id)
                     VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
@@ -140,7 +139,7 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
             inserted_sensors.add(sensor_id)
 
         # Insert Record
-        if record_time and record_value and sensor_id:
+        if record_time is not None:
             db.execute_insert(
                 """INSERT INTO records (module_id, record_time, record_value, sensor_id)
                     VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;""",
@@ -148,28 +147,26 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
             )
             inserted_records += 1
 
-        return {
-            "status": "success",
-            "inserted": {
-                "rooms": len(inserted_rooms),
-                "modules": len(inserted_modules),
-                "sensors": len(inserted_sensors),
-                "records": inserted_records
-            }
+    return {
+        "status": "success",
+        "inserted": {
+            "rooms": len(inserted_rooms),
+            "modules": len(inserted_modules),
+            "sensors": len(inserted_sensors),
+            "records": inserted_records
         }
+    }
 
 @app.get("/export-data")
 def export_data(response: Response):
     def stream_csv():
-        with db.conn.cursor(name='export_cursor') as cursor:
+        with db.conn.cursor() as cursor:
 
             cursor.itersize = 1000
             cursor.execute(sql.GET_ALL_DATA_QUERY)
 
-            if cursor.description:
-                header = [desc[0] for desc in cursor.description]
-                yield ','.join(header) + '\n'
-                
+
+            yield "room_id,room_name,module_id,position_x,position_y,position_z,sensor_id,sensor_type,sensor_unit,record_time,record_value\n"
             for row in cursor:
                 frow = [str(item) if item is not None else '' for item in row]
                 yield ','.join(frow) + '\n'

@@ -80,7 +80,7 @@ const Dashboard = () => {
     const fetchData = async () => {
 
         try {
-            const startMS = Math.floor(new Date(startTime).getTime()/1000);
+            var startMS = Math.floor(new Date(startTime).getTime()/1000);
             var endMS = Math.floor(new Date(endTime).getTime()/1000);
 
             if(startMS === 0 && endMS === 0) { //last hour
@@ -110,6 +110,10 @@ const Dashboard = () => {
 
     const processSensorData = (apiData) => {
         const grouped = {};
+
+        if(!Array.isArray(apiData)) {
+            return {};
+        }
 
         apiData.forEach((module) => {
             const id = module.module_id;
@@ -147,8 +151,8 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        console.log("selectedRoom:", roomNumber);
-        console.log(`images/floorplan_${roomNumber}.png`)
+        // console.log("selectedRoom:", roomNumber);
+        // console.log(`images/floorplan_${roomNumber}.png`)
     }, [roomNumber]);
 
     useEffect(() => {
