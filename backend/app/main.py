@@ -160,13 +160,17 @@ async def import_data(file: UploadFile = File(...), response: Response = None):
 
 @app.get("/export-data")
 def export_data(response: Response):
-    columns, results = db.execute_sql(sql.GET_ALL_DATA_QUERY, column_names=True)
-    df = pd.DataFrame(results, columns=columns)
+    def stream_csv():
+        with db.conn.cursor(name='export_cursor') as cursor:
+            cursor.itersize = 1000
+            cursor.execute(sql.GET_ALL_DATA_QUERY)
 
-    csv_data = df.to_csv(index=False, encoding="utf-8-sig")
+            yield ','.join([desc[0] for desc in cursor.description]) + '\n'
+            for row in cursor:
+                yield ','.join([str(item) if item is not None else '' for item in row]) + '\n'
 
     return StreamingResponse(
-        csv_data,
+        stream_csv(),
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=data.csv"}
     )
