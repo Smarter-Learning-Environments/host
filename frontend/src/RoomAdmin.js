@@ -98,7 +98,7 @@ const RoomAdmin = () => {
         if (!roomNumber) return;
 
         const img = new Image();
-        img.src = `/images/floorplan_${roomNumber}.png`;
+        img.src = `http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`;
         img.onload = () => {
             originalSize.current = { width: img.width, height: img.height };
         };
@@ -277,7 +277,7 @@ const RoomAdmin = () => {
             {isLoggedIn && (
                 <div className="admin-container">
                     <div className="image-container" onMouseMove={handleMouseMove} onClick={handleFloorPlanClick}>
-                        <img ref={imageRef} src={`http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`} alt="Floor Plan of the classroom" />
+                        <img key={roomNumber} ref={imageRef} src={`http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`} alt="Floor Plan of the classroom" />
                         {!showPopup && Array.isArray(latestModules) && 
                             latestModules.map((module, index) => {
                                 const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);
