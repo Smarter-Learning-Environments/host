@@ -57,8 +57,11 @@ const RoomAdmin = () => {
     }, [roomNumber, showPopup]);
 
     const handleUploadFloorplan = async (e) => {
+
+        setLoading(true);
+        console.log(roomNumber);
         const formData = new FormData();
-        formData.append("room_number", 1);
+        formData.append("room_number", roomNumber);
         formData.append("img_file", selectedFile);
 
         const response = await fetch(`http://${window.location.hostname}:8000/upload-floorplan`, {
@@ -67,6 +70,7 @@ const RoomAdmin = () => {
         });
     
         const data = await response.json();
+        setLoading(false);
         // console.log(data);
     }
 
@@ -144,7 +148,7 @@ const RoomAdmin = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        console.log(`hw id is ${selectedModule.hw_id}`);
+        // console.log(`hw id is ${selectedModule.hw_id}`);
         const payload = {
             hw_id: selectedModule.hw_id,
             room_id: roomNumber,
@@ -273,7 +277,7 @@ const RoomAdmin = () => {
             {isLoggedIn && (
                 <div className="admin-container">
                     <div className="image-container" onMouseMove={handleMouseMove} onClick={handleFloorPlanClick}>
-                        <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
+                        <img ref={imageRef} src={`http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`} alt="Floor Plan of the classroom" />
                         {!showPopup && Array.isArray(latestModules) && 
                             latestModules.map((module, index) => {
                                 const {left, top} = scalePosition(module.module_xyz[0], module.module_xyz[1]);

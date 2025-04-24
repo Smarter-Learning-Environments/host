@@ -7,7 +7,7 @@ from .utils import *
 from . import broker, db, sql
 from pydantic import ValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Response, UploadFile, File, Form
+from fastapi import FastAPI, Response, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 
 origins = [
@@ -56,6 +56,20 @@ def read_root():
     # TODO health/status endpoint for docker
     # TODO pass error codes through node/react engine
     return {"message": "Hello, World!"}
+
+@app.get("/get-floorplan")
+def get_floorplan(room_number: int):
+    try:
+        c, r = db.execute_sql(sql.GET_FLOORPLAN_QUERY, args=(room_number,), column_names=True)
+        if not r:
+            raise HTTPException(status_code=404, detail="Floorplan data not found")
+        
+        img_data = r[0][0]
+        return Response(content=img_data, media_type="img/png")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+        
+
 
 @app.post("/upload-floorplan")
 async def upload_floorplan(room_number: int = Form(...), img_file: UploadFile = File(...)):

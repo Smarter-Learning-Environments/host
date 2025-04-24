@@ -1,3 +1,7 @@
+GET_FLOORPLAN_QUERY = """
+    SELECT img_data FROM room WHERE room_id = %s
+"""
+
 INSERT_FLOORPLAN_QUERY = """
     UPDATE room SET img_data = %s WHERE room_id = %s
 """

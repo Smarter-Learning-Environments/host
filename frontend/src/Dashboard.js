@@ -249,7 +249,7 @@ const Dashboard = () => {
 
             <div className="container">
                 <div className="image-container">
-                    <img ref={imageRef} src={`images/floorplan_${roomNumber}.png`} alt="Floor Plan of the classroom" />
+                    <img ref={imageRef} src={`http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`} alt="Floor Plan of the classroom" />
                         { (latestModules.length > 0) && latestModules.map((module, index) => {
                             const { left, top } = scalePosition(module.module_xyz[0], module.module_xyz[1]);
                             if(module.module_xyz[0] < 0) return null;
