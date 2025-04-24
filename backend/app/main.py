@@ -8,7 +8,7 @@ from . import broker, db, sql
 from pydantic import ValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, UploadFile, File, Form, HTTPException
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 
 origins = [
     "http://localhost",
@@ -61,8 +61,9 @@ def read_root():
 def get_floorplan(room_number: int):
     try:
         c, r = db.execute_sql(sql.GET_FLOORPLAN_QUERY, args=(room_number,), column_names=True)
-        if not r:
-            raise HTTPException(status_code=404, detail="Floorplan data not found")
+        if not r or r[0][0] is None:
+            print("\n\n\nhi\n\n\n")
+            return FileResponse("app/static/default.png", media_type="image/png")
         
         img_data = r[0][0]
         return Response(content=img_data, media_type="img/png")

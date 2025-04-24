@@ -159,7 +159,7 @@ const Dashboard = () => {
         if (!roomNumber) return;
 
         const img = new Image();
-        img.src = `/images/floorplan_${roomNumber}.png`;
+        img.src = `http://${window.location.hostname}:8000/get-floorplan?room_number=${roomNumber}`;
         img.onload = () => {
             originalSize.current = { width: img.width, height: img.height };
         };
