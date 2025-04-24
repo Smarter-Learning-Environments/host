@@ -72,6 +72,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
             .text(`${title}${units ? ` (${units})` : ""}`);
 
         const line = d3.line()
+            .defined(d => d.y != null && !isNaN(d.y))
             .x(d => x(new Date(d.x)))
             .y(d => y(d.y))
             .curve(d3.curveLinear);
@@ -93,8 +94,7 @@ const SensorGraph = ({ title, sensorSeries }) => {
                 .datum(series.data)
                 .attr("fill", "none")
                 .attr("stroke", d3.schemeCategory10[series.colorIndex % 10])
-                .attr("stroke-width", 2)
-                .attr("d", line);
+                .attr("stroke-width", 2);
 
 
 

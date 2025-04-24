@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import "./style.css"; 
-import SensorGraph from "./subcomponents/SensorGraph";
-import { RoomSelector, DataTooltip } from "./subcomponents";
+import { RoomSelector, DataTooltip, Spinner, SensorGraph} from "./subcomponents";
 
 const Dashboard = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -29,6 +28,7 @@ const Dashboard = () => {
     const [firstDataFetch, setFirstDataFetch] = useState(true);
     const [roomNumber, setRoomNumber] = useState(1);
     const [roomData, setRoomData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -225,6 +225,7 @@ const Dashboard = () => {
     }
 
     const handleExport = async () => {
+        setLoading(true);
         try {
             const res = await fetch(`http://${window.location.hostname}:8000/export-data`);
             const blob = await res.blob();
@@ -238,6 +239,8 @@ const Dashboard = () => {
             link.remove();
         } catch (err) {
             console.error("Error fetching export data: ", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -325,7 +328,10 @@ const Dashboard = () => {
 
             <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
 
-            <button className="export-button" onClick={handleExport}>Exportar Datos</button>
+            <div>
+                {loading && <Spinner />}
+                <button className="export-button" onClick={handleExport}>Exportar Datos</button>
+            </div>
 
             <DataTooltip tooltip={tooltip} />
 

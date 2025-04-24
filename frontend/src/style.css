@@ -256,7 +256,7 @@ button[type="button"] {
     cursor: pointer;
     border: 2px solid white;
     box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    z-index: 10;
+    z-index: 9999;
 }
 
 .tooltip {
@@ -270,6 +270,9 @@ button[type="button"] {
 }
 
 .admin-container {
+    align-items: center;
+    margin: auto;
+    width: 70%;
     padding: 40px;
 }
 
@@ -287,7 +290,7 @@ button[type="button"] {
 }
 
 .d3-tooltip {
-    z-index: 9999;
+    z-index: 999;
 }
 
 .room-selector {
@@ -341,4 +344,33 @@ right: 5px;
     gap: 20px;
     padding: 10px;
     box-sizing: border-box;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999999999;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

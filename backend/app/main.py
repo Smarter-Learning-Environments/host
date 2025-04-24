@@ -164,9 +164,8 @@ def export_data(response: Response):
 
             cursor.itersize = 1000
             cursor.execute(sql.GET_ALL_DATA_QUERY)
-
-
-            yield "room_id,room_name,module_id,position_x,position_y,position_z,sensor_id,sensor_type,sensor_unit,record_time,record_value\n"
+            
+            yield "room_id,room_name,img_path,module_id,position_x,position_y,position_z,sensor_id,sensor_type,sensor_unit,record_time,record_value\n"
             for row in cursor:
                 frow = [str(item) if item is not None else '' for item in row]
                 yield ','.join(frow) + '\n'

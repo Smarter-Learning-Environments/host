@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css"; 
 import { useNavigate } from "react-router-dom";
-import { RoomSelector, DataTooltip } from "./subcomponents/";
+import { RoomSelector, DataTooltip, Spinner } from "./subcomponents/";
 
 const RoomAdmin = () => {
     const [selectedFactors, setSelectedFactors] = useState({
@@ -33,6 +33,7 @@ const RoomAdmin = () => {
     const [selectedModule, setSelectedModule] = useState(null);
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         setIsLoggedIn(document.cookie
@@ -218,8 +219,13 @@ const RoomAdmin = () => {
     };
 
     const handleImport = async (event) => {
+        setLoading(true);
+
         const file = event.target.files[0];
-        if(!file) return;
+        if(!file) {
+            setLoading(false);
+            return;
+        }
 
         const formData = new FormData();
         formData.append("file", file);
@@ -237,6 +243,8 @@ const RoomAdmin = () => {
 
         } catch (err) {
             alert("Error: " + err.message);
+        } finally {
+            setLoading(false);
         }
 
     };
@@ -346,7 +354,10 @@ const RoomAdmin = () => {
 
                     <RoomSelector roomData={roomData} selectedRoom={roomNumber} onChange={setRoomNumber} />
 
+                    <DataTooltip tooltip={tooltip} />
+
                     <div className="import-data">
+                        {loading && <Spinner />}
                         <input
                             type="file"
                             accept=".csv"
@@ -359,27 +370,8 @@ const RoomAdmin = () => {
                         </button>
                     </div>
 
-                    {tooltip.visible && !showPopup && (
-                        <div
-                            className="tooltip"
-                            style={{
-                                position: "fixed",
-                                left: tooltip.x + 10,
-                                top: tooltip.y + 10,
-                                background: "white",
-                                border: "1px solid #ccc",
-                                padding: "8px",
-                                borderRadius: "4px",
-                                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
-                                zIndex: 999,
-                                pointerEvents: "none",
-                                fontSize: "12px"
-                            }}
-                            dangerouslySetInnerHTML={{ __html: tooltip.content }}
-                        />
-                    )}
-
-                </div>)}
+                </div>
+            )}
                 
             {!isLoggedIn && (
                 <label className="error-msg">
