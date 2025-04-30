@@ -88,6 +88,15 @@ WHERE m.room_id = %s;
 
 """ # params: Room ID
 
+ANALYTICS_TIMERANGE_QUERY = """
+SELECT sensors.sensor_type, sensors.sensor_unit, AVG(record_value), stddev(record_value), MIN(record_value), MAX(record_value)
+FROM records
+INNER JOIN sensors ON (records.sensor_id = sensors.sensor_id AND records.module_id = sensors.module_id)
+INNER JOIN modules ON records.module_id = modules.module_id
+WHERE modules.room_id = %s AND records.record_time >= %s AND records.record_time <= %s
+GROUP BY (sensors.sensor_type, sensors.sensor_unit, records.sensor_id, records.module_id);
+""" # params: room_id, time_start, time_end, limit
+
 READINGS_TIMERANGE_QUERY = """
 SELECT
     sensors.sensor_id,
