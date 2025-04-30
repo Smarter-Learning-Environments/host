@@ -308,10 +308,10 @@ def get_latest_reading(room_id: int, response: Response):
     return res
 
 @app.get('/get-data-timerange/{room_id}/{time_start}/{time_end}')
-def get_data_timerange(room_id: int, time_start: int, time_end: int, response: Response):
+def get_data_timerange(room_id: int, time_start: int, time_end: int, response: Response, max_datapoints: int = 10000000):
     df = None
 
-    columns, results = db.execute_sql(sql.READINGS_TIMERANGE_QUERY, args=(room_id, time_start, time_end), column_names=True)
+    columns, results = db.execute_sql(sql.READINGS_TIMERANGE_QUERY, args=(room_id, time_start, time_end, max_datapoints), column_names=True)
     df = pd.DataFrame(results, columns=columns)
     # TODO Query params to filter by module? Room? Sensor 
 
