@@ -221,7 +221,9 @@ const Dashboard = () => {
         setEndTime(e.target.value);
     }
     const handleTimeSubmit = () => {
+        setLoading(true);
         fetchData();
+        setLoading(false);
     }
 
     const handleExport = async () => {
